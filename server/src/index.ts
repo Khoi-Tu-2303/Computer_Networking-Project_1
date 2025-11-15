@@ -1,4 +1,5 @@
-﻿import express from 'express';
+﻿// file index.ts
+import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import { registerAgentHandlers } from './handlers/agentHandler';

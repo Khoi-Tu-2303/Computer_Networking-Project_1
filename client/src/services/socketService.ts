@@ -1,4 +1,5 @@
-﻿import { io, Socket } from 'socket.io-client';
+﻿// file socketService.ts
+import { io, Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 
 // Giữ lại đuôi file ".ts" (theo file của bạn)

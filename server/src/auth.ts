@@ -1,3 +1,4 @@
+// file auther.ts
 import jwt from 'jsonwebtoken';
 import { Socket } from 'socket.io';
 import { logger } from './logger';

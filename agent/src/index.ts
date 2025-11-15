@@ -1,4 +1,4 @@
-
+// file index.ts
 import { initSocket } from "./core/socket.js";
 import { loadConfig } from "./config/env.js";
 import { initHeartbeat } from "./core/heartbeat.js";

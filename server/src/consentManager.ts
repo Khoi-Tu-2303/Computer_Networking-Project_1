@@ -1,3 +1,4 @@
+// file consentManaget.ts
 export class ConsentManager {
     // pending consents keyed by request id
     private pending = new Map<string, { agentId: string; resolve: (v: boolean) => void; reject: (e: any) => void }>();
