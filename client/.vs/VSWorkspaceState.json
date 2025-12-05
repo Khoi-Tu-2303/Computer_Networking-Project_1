@@ -1,10 +1,12 @@
 {
   "ExpandedNodes": [
     "",
+    "\\electron",
     "\\src",
+    "\\src\\components",
     "\\src\\contexts",
     "\\src\\services"
   ],
-  "SelectedNode": "\\package.json",
+  "SelectedNode": "\\src\\components\\KeyloggerCard.tsx",
   "PreviewInSolutionExplorer": false
 }

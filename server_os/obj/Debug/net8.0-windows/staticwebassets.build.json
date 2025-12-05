@@ -1,0 +1,58 @@
+{
+  "Version": 1,
+  "Hash": "Dpk32Vk1wuLQAsmDSGMwza//JoiISQVXmMhNTYhFt20=",
+  "Source": "server_os",
+  "BasePath": "_content/server_os",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "server_os\\wwwroot",
+      "Source": "server_os",
+      "ContentRoot": "D:\\Project\\server_os\\wwwroot\\",
+      "BasePath": "_content/server_os",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "D:\\Project\\server_os\\wwwroot\\index.html",
+      "SourceId": "server_os",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Project\\server_os\\wwwroot\\",
+      "BasePath": "_content/server_os",
+      "RelativePath": "index.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\index.html"
+    },
+    {
+      "Identity": "D:\\Project\\server_os\\wwwroot\\style.css",
+      "SourceId": "server_os",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Project\\server_os\\wwwroot\\",
+      "BasePath": "_content/server_os",
+      "RelativePath": "style.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\style.css"
+    }
+  ]
+}

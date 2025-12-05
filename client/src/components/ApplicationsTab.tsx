@@ -1,288 +1,161 @@
-﻿import React, { useState, useEffect } from 'react';
-import { RefreshCw, Play, XCircle } from 'lucide-react';
+﻿import React, { useState } from 'react';
+import { Play, Plus, Trash2, RefreshCw } from 'lucide-react'; // Import icon mới
+import { sendCommand } from '../services/socketService';
+import { ProcessInfo } from './ProcessManager';
 
-// SỬA LỖI IMPORT:
-// Thử đường dẫn 'core' giống như project 'agent'
-import { useSocket } from '../contexts/SocketContext';
-import { sendCommand } from '../services/socketService'; // <-- Dùng hàm sendCommand
-
-/**
- * Định nghĩa cấu trúc dữ liệu cho một ứng dụng
- */
-interface AppInfo {
-    pid: number;
-    name: string;
-    title: string;
+// Nhận props từ cha (ProcessManager)
+interface Props {
+    allProcesses: ProcessInfo[];
+    onRefresh: () => void;
 }
 
-// Gợi ý các app phổ biến
+// Danh sách gợi ý (Giữ nguyên)
 const commonApps = [
     { value: "notepad.exe", label: "Notepad" },
     { value: "calc.exe", label: "Calculator" },
     { value: "cmd.exe", label: "Command Prompt" },
-    { value: "explorer.exe", label: "File Explorer" },
-    { value: "chrome.exe", label: "Google Chrome" },
-    { value: "msedge.exe", label: "Microsoft Edge" },
-    { value: "powershell.exe", label: "PowerShell" },
+    { value: "mspaint.exe", label: "Paint" },
+    { value: "explorer.exe", label: "Explorer" },
+    { value: "chrome.exe", label: "Chrome" },
+    { value: "msedge.exe", label: "Edge" },
 ];
 
-/**
- * Component hiển thị tab "Applications"
- * Đã cập nhật Responsive & Thêm lịch sử "Recently Killed" (VÀ SỬA LỖI LOGIC)
- */
-export function ApplicationsTab() {
-    const { selectedAgentId } = useSocket();
-    const [applications, setApplications] = useState<AppInfo[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+export function ApplicationsTab({ allProcesses, onRefresh }: Props) {
     const [newAppName, setNewAppName] = useState("");
-    const [recentlyKilledApps, setRecentlyKilledApps] = useState<AppInfo[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    /**
-     * Hàm gọi lên agent để yêu cầu danh sách ứng dụng
-     */
-    const fetchApplications = async () => {
-        if (!selectedAgentId) {
-            // Đừng alert, chỉ return thầm lặng
-            return;
-        }
-        console.log("Đang yêu cầu danh sách applications...");
+    // Lọc ra các ứng dụng (Type = APP) từ danh sách tổng
+    const applications = allProcesses.filter(p => p.type === 'APP');
+
+    // --- LOGIC START APP (GIỮ NGUYÊN) ---
+    const handleStartApp = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newAppName.trim()) return;
+
         setIsLoading(true);
         try {
-            const response = await sendCommand(
-                selectedAgentId,
-                'list_applications'
-            );
-            setApplications(response.payload || []);
-        } catch (error: any) {
-            alert(`Lỗi khi lấy applications: ${error.message}`);
-            setApplications([]);
-        }
-        setIsLoading(false);
-    };
+            await sendCommand('start_app', newAppName);
+            setNewAppName("");
 
-    /**
-     * Hàm xử lý kill một ứng dụng
-     */
-    const handleKillApp = async (appToKill: AppInfo) => {
-        if (!selectedAgentId) {
-            alert('Vui lòng chọn một Agent trước.');
-            return;
-        }
-        // Dùng confirm (như file trước)
-        if (!window.confirm(`Bạn có chắc muốn kill "${appToKill.title || appToKill.name}" (PID: ${appToKill.pid})?`)) {
-            return;
-        }
-
-        try {
-            await sendCommand(selectedAgentId, 'kill_process', { pid: appToKill.pid });
-
-            // Thêm vào danh sách 'recently killed'
-            setRecentlyKilledApps(prev => {
-                // Kiểm tra xem app này (với PID này) đã có trong danh sách chưa
-                const existing = prev.find(a => a.pid === appToKill.pid);
-                if (existing) return prev; // Nếu có rồi thì không thêm nữa
-                // Thêm app vào đầu danh sách và giới hạn 5 app
-                const newList = [appToKill, ...prev];
-                return newList.slice(0, 5);
-            });
-
-            // Tải lại danh sách chính
-            fetchApplications();
-        } catch (error: any) {
-            alert(`Lỗi khi kill process: ${error.message}`);
-        }
-    };
-
-    /**
-     * Hàm xử lý khởi động một ứng dụng
-     */
-    const handleStartApp = async (appName: string) => {
-        if (!appName.trim()) {
-            alert("Vui lòng nhập tên file .exe (ví dụ: notepad.exe)");
-            return;
-        }
-        if (!selectedAgentId) {
-            alert('Vui lòng chọn một Agent trước.');
-            return;
-        }
-
-        console.log(`Đang yêu cầu start app: ${appName}`);
-        try {
-            await sendCommand(selectedAgentId, 'start_application', { appName: appName });
-
-            // Nếu appName này đang được nhập ở ô input, thì xóa nó
-            if (newAppName === appName) {
-                setNewAppName("");
-            }
-
-            // SỬA LỖI LOGIC: Xóa app này khỏi "Recently Killed"
-            // (Dùng toLowerCase để so sánh không phân biệt hoa thường)
-            setRecentlyKilledApps(prev =>
-                prev.filter(app => app.name.toLowerCase() !== appName.toLowerCase())
-            );
-
-            // Chờ 2.5 GIÂY để app kịp khởi động rồi mới refresh
+            // Đợi 2s để app mở lên rồi refresh list
             setTimeout(() => {
-                fetchApplications();
-            }, 4500); // <-- THAY ĐỔI TỪ 1000 LÊN 2500
-
-        } catch (error: any) {
-            alert(`Lỗi khi start application: ${error.message}`);
+                onRefresh();
+                setIsLoading(false);
+            }, 2000);
+        } catch (error) {
+            alert("Lỗi start app: " + error);
+            setIsLoading(false);
         }
     };
 
-
-    /**
-     * Effect này sẽ fetch dữ liệu lần đầu khi Agent được chọn
-     */
-    useEffect(() => {
-        if (selectedAgentId) {
-            fetchApplications();
-        } else {
-            // Nếu không chọn agent, xóa sạch dữ liệu
-            setApplications([]);
-            setRecentlyKilledApps([]);
+    // --- LOGIC KILL APP (GIỮ NGUYÊN) ---
+    const handleKillApp = async (pid: number) => {
+        if (!window.confirm(`Đóng ứng dụng PID ${pid}?`)) return;
+        try {
+            await sendCommand('kill_process', pid);
+            setTimeout(onRefresh, 1000);
+        } catch (err) {
+            alert(err);
         }
-    }, [selectedAgentId]); // Chạy lại khi selectedAgentId thay đổi
+    };
 
     return (
-        <div className="py-4 animate-fade-in">
+        <div className="space-y-4 animate-fade-in">
 
-            {/* === KHUNG START APP (ĐÃ SỬA RESPONSIVE) === */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">Start New Application</h3>
-                {/* Sửa lại: Dùng flex-col cho di động và sm:flex-row cho màn hình lớn */}
-                <form
-                    className="flex flex-col sm:flex-row items-stretch gap-2"
-                    onSubmit={(e) => { e.preventDefault(); handleStartApp(newAppName); }}
-                >
+            {/* --- FORM NHẬP TÊN APP (GIAO DIỆN MỚI) --- */}
+            <form onSubmit={handleStartApp} className="flex gap-2">
+                <div className="flex-1 relative">
                     <input
                         list="common-apps"
+                        type="text"
                         value={newAppName}
                         onChange={(e) => setNewAppName(e.target.value)}
-                        placeholder="Ví dụ: notepad.exe"
-                        // Sửa lại: w-full (trên di động) và sm:w-auto (trên desktop)
-                        className="flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto"
-                        disabled={!selectedAgentId}
+                        placeholder="// ENTER_APP_NAME_OR_PATH (ex: notepad.exe)"
+                        className="w-full bg-black neon-border-cyan px-4 py-2 rounded text-cyan-500 font-mono text-sm placeholder-cyan-500/30 focus:outline-none focus:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all duration-300"
+                        disabled={isLoading}
                     />
+                    {/* Datalist cho gợi ý */}
                     <datalist id="common-apps">
                         {commonApps.map((app) => (
                             <option key={app.value} value={app.value}>{app.label}</option>
                         ))}
-                        {/* SỬA LỖI GÕ NHẦM: </datalal> thành </datalist> */}
                     </datalist>
+                </div>
 
-                    <button
-                        type="submit"
-                        disabled={isLoading || !selectedAgentId || !newAppName}
-                        // Sửa lại: w-full (trên di động) và sm:w-auto (trên desktop)
-                        className="flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-gray-400 transition-all duration-150 w-full sm:w-auto"
-                    >
-                        <Play size={16} />
-                        Start
-                    </button>
-                </form>
-            </div>
-
-            {/* === KHUNG LÀM MỚI VÀ BẢNG DỮ LIỆU === */}
-            <div className="flex justify-end mb-4">
                 <button
-                    onClick={fetchApplications}
-                    disabled={isLoading || !selectedAgentId}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 transition-all duration-150"
+                    type="submit"
+                    disabled={isLoading || !newAppName}
+                    className="bg-black neon-border-green hover:bg-green-950/30 px-4 py-2 rounded transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center gap-2 disabled:opacity-50"
                 >
-                    <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-                    {isLoading ? 'Đang tải...' : 'Làm mới'}
+                    {isLoading ? <RefreshCw className="w-4 h-4 animate-spin text-green-500" /> : <Plus className="w-4 h-4 text-green-500" />}
+                    <span className="text-green-500 font-bold text-sm">LAUNCH</span>
                 </button>
-            </div>
+            </form>
 
-            {/* === BẢNG DỮ LIỆU (CÓ THANH CUỘN VÀ STICKY HEADER) === */}
-            {/* SỬA LỖI: Bỏ overflow-hidden, Thêm overflow-x-auto để cuộn ngang trên di động */}
-            <div className="rounded-lg border border-gray-200 shadow-sm max-h-[500px] overflow-y-auto overflow-x-auto relative">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50 sticky top-0 z-10">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Tiêu đề cửa sổ
-                            </th>
-                            {/* SỬA LỖI TYPO "font-m"edium" */}
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Tên Tiến Trình
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                PID
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {isLoading && applications.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} className="p-4 text-center text-gray-500">Đang tải danh sách ứng dụng...</td>
-                            </tr>
-                        ) : !applications || applications.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} className="p-4 text-center text-gray-500">Không tìm thấy ứng dụng nào có cửa sổ đang chạy.</td>
-                            </tr>
-                        ) : (
-                            applications.map((app) => (
-                                <tr key={app.pid} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {/* Thêm truncate và title để xem đầy đủ khi hover */}
-                                        <div className="text-sm font-medium text-gray-900 truncate" title={app.title}>{app.title || "(Không có tiêu đề)"}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">{app.name}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            {app.pid}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button
-                                            onClick={() => handleKillApp(app)}
-                                            disabled={!selectedAgentId}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 transition-colors disabled:bg-gray-400"
-                                        >
-                                            <XCircle size={14} />
-                                            Kill
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-                {/* SỬA LỖI GÕ NHẦM: </> thành </div> */}
-            </div>
-
-            {/* === TÍNH NĂNG MỚI: KHUNG "RECENTLY KILLED" === */}
-            {/* Chỉ hiện khung này nếu có app trong danh sách */}
-            {recentlyKilledApps.length > 0 && (
-                <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Recently Killed</h3>
-                    <p className="text-sm text-gray-600 mb-4">Khởi động lại ứng dụng bạn vừa đóng nhầm:</p>
-                    <div className="flex flex-wrap gap-2">
-                        {recentlyKilledApps.map((app) => (
-                            <button
-                                key={app.pid} // Dùng pid làm key cho an toàn
-                                onClick={() => handleStartApp(app.name)} // Sửa ở đây
-                                disabled={!selectedAgentId}
-                                title={`Start ${app.name}`}
-                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:bg-gray-400 transition-all duration-150"
-                            >
-                                <Play size={14} />
-                                {/* Chỉ hiện tên file (name) thay vì title (có thể rất dài) */}
-                                {app.name}
-                            </button>
-                        ))}
+            {/* --- BẢNG DANH SÁCH APP (GIAO DIỆN TERMINAL) --- */}
+            <div className="terminal-window rounded-lg overflow-hidden">
+                {/* Header Bảng */}
+                <div className="bg-black border-b border-green-500/30 p-3">
+                    <div className="grid grid-cols-12 gap-4 text-xs font-bold text-green-500 uppercase tracking-wider">
+                        <div className="col-span-4">APPLICATION NAME</div>
+                        <div className="col-span-5">WINDOW TITLE</div>
+                        <div className="col-span-2 text-center">PID</div>
+                        <div className="col-span-1 text-right">KILL</div>
                     </div>
                 </div>
-            )}
 
+                {/* Body Bảng */}
+                <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                    {applications.length === 0 ? (
+                        <div className="p-8 text-center text-green-500/30 font-mono text-sm">
+                            {'> NO_ACTIVE_APPLICATIONS_FOUND'}
+                        </div>
+                    ) : (
+                        applications.map((app, index) => (
+                            <div
+                                key={app.pid}
+                                className={`grid grid-cols-12 gap-4 items-center p-3 text-xs border-b border-green-500/10 hover:bg-green-500/5 transition-colors group ${index % 2 === 0 ? 'bg-black/40' : 'bg-black/20'
+                                    }`}
+                            >
+                                {/* Cột Name */}
+                                <div className="col-span-4 flex items-center gap-2 overflow-hidden">
+                                    <Play className="w-3 h-3 text-green-500/50 flex-shrink-0" />
+                                    <span className="text-green-400 font-mono truncate" title={app.name}>{app.name}</span>
+                                </div>
+
+                                {/* Cột Title (Category cũ) */}
+                                <div className="col-span-5 text-cyan-500/80 font-mono truncate" title={app.title}>
+                                    {app.title || "N/A"}
+                                </div>
+
+                                {/* Cột PID (Memory cũ) */}
+                                <div className="col-span-2 text-center font-bold text-yellow-500 font-mono">
+                                    {app.pid}
+                                </div>
+
+                                {/* Cột Action */}
+                                <div className="col-span-1 flex justify-end">
+                                    <button
+                                        onClick={() => handleKillApp(app.pid)}
+                                        className="opacity-60 group-hover:opacity-100 transition-opacity hover:scale-110"
+                                        title="Close Application"
+                                    >
+                                        <Trash2 className="w-4 h-4 text-red-500 hover:text-red-400 hover:drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            {/* Footer Stats */}
+            <div className="p-3 bg-green-950/20 border border-green-500/30 rounded text-xs text-green-400 font-mono flex justify-between items-center">
+                <span>{`> TOTAL_RUNNING: ${applications.length}`}</span>
+                <button onClick={onRefresh} className="hover:text-green-300 flex items-center gap-1">
+                    <RefreshCw className="w-3 h-3" /> REFRESH_DATA
+                </button>
+            </div>
         </div>
     );
 }

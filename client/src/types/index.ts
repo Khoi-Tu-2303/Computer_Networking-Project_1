@@ -1,39 +1,23 @@
-export interface Process {
-  id: string;
-  name: string;
-  pid: number;
-  status: 'Running' | 'Sleeping' | 'Stopped';
+﻿// file: src/types/index.ts
+
+// Kiểu dữ liệu cho Process (khớp với code Server C# trả về)
+export interface ProcessInfo {
+    pid: number;
+    name: string;
+    title: string;
+    type: 'APP' | 'PROC';
 }
 
-export interface Application {
-  id: string;
-  name: string;
-  isRunning: boolean;
+// Kiểu dữ liệu cho Application (nếu dùng riêng)
+export interface AppInfo {
+    pid: number;
+    name: string;
+    title: string;
 }
 
-export interface KeylogEntry {
-  id: string;
-  timestamp: string;
-  key: string;
-}
-export interface KeylogEntry {
+// Kiểu dữ liệu Agent
+export interface Agent {
     id: string;
-    timestamp: string;
-    key: string;
-}
-
-export interface ElectronAPI {
-    startSystemLogging: () => Promise<boolean>;
-    stopSystemLogging: () => Promise<boolean>;
-    clearSystemLogs: () => Promise<boolean>;
-    getSystemLogs: () => Promise<KeylogEntry[]>;
-    getLoggingStatus: () => Promise<boolean>;
-    onKeyLog: (callback: (log: KeylogEntry) => void) => void;
-    removeAllListeners: (channel: string) => void;
-}
-
-declare global {
-    interface Window {
-        electronAPI: ElectronAPI;
-    }
+    name: string;
+    status: 'online' | 'offline';
 }

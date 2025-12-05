@@ -1,116 +1,160 @@
-﻿// file socketService.ts
-import { io, Socket } from 'socket.io-client';
-import { v4 as uuidv4 } from 'uuid';
+﻿// file: src/services/socketService.ts
+import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
-// Giữ lại đuôi file ".ts" (theo file của bạn)
-import { RequestMessage, ResponseMessage, EventMessage } from '../protocol.ts';
+// Khai báo biến connection để dùng chung
+let connection: HubConnection;
+const checkIP = async (ip: string): Promise<string | null> => {
+    try {
+        const controller = new AbortController();
+        // Tăng timeout lên 1s (hoặc 1.5s nếu mạng wifi yếu)
+        const timeoutId = setTimeout(() => controller.abort(), 1000);
 
-// Map để lưu các request đang chờ phản hồi
-const pendingRequests = new Map<string, (response: ResponseMessage) => void>();
-
-// Khai báo socket ở đây, nhưng chưa khởi tạo
-let socket: Socket;
-
-/**
- * Khởi tạo kết nối Socket.IO
- * (Hàm này PHẢI được gọi từ SocketContext.tsx hoặc main.tsx)
- */
-export const initSocket = () => {
-    // Toàn bộ logic "IP Động" được chuyển vào ĐÂY
-    // Chỉ khi hàm này chạy (trong trình duyệt), "window" mới tồn tại
-    const CLIENT_HOSTNAME = window.location.hostname;
-    const PROTOCOL = window.location.protocol;
-    const SERVER_URL = `${PROTOCOL}//${CLIENT_HOSTNAME}:8080`;
-    const FINAL_URL = `${SERVER_URL}/clients`;
-
-    console.log(`Socket Service (Dynamic): Đang cố gắng kết nối tới ${FINAL_URL}`);
-
-    // Khởi tạo socket
-    socket = io(FINAL_URL, {
-        reconnection: true,
-    });
-
-    socket.on('connect', () => {
-        console.log('Đã kết nối tới Server Tổng đài (Clients)');
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Mất kết nối Server Tổng đài');
-    });
-
-    socket.on('connect_error', (err) => {
-        console.error('Socket connection error:', err.message);
-    });
-
-    // Lắng nghe PHẢN HỒI (response) từ Agent
-    // Tên event là 'message' (theo file của bạn)
-    socket.on('message', (response: ResponseMessage) => {
-        const callback = pendingRequests.get(response.id);
-        if (callback) {
-            callback(response);
-            pendingRequests.delete(response.id);
-        }
-    });
-
-    // Lắng nghe EVENT (agent connect/disconnect) từ Server
-    socket.on('event', (event: EventMessage) => {
-        console.log('Server Event:', event.event, event.payload);
-        // (Bạn sẽ dùng event này trong Context để cập nhật danh sách Agent)
-    });
-
-    // SỬA LỖI: Thêm dòng này vào
-    return socket;
-};
-
-/**
- * Gửi một lệnh (command) đến một agent cụ thể và chờ phản hồi
- */
-export const sendCommand = (
-    agentId: string,
-    action: string,
-    payload?: unknown
-): Promise<ResponseMessage> => {
-
-    return new Promise((resolve, reject) => {
-        // Phải kiểm tra 'socket' (xem initSocket đã chạy chưa)
-        if (!socket || !socket.connected) {
-            return reject(new Error('Socket is not connected. (initSocket() might not have been called)'));
-        }
-
-        const requestId = uuidv4(); // Tạo ID duy nhất cho request
-
-        const requestMessage: RequestMessage = {
-            protocolVersion: '1.0',
-            id: requestId,
-            type: 'request',
-            action: action,
-            payload: payload,
-            meta: {
-                agentId: agentId, // Quan trọng: Gửi cho Agent nào
-                timestamp: Date.now(),
-            },
-        };
-
-        // Đăng ký callback chờ phản hồi
-        pendingRequests.set(requestId, (response) => {
-            if (response.status === 'ok') {
-                resolve(response);
-            } else {
-                reject(new Error(response.error?.message || 'Unknown error'));
-            }
+        const response = await fetch(`http://${ip}:5000/api/discovery`, {
+            signal: controller.signal,
+            method: 'GET',
+            mode: 'cors'
         });
 
-        // Gửi lệnh 'request' (theo file của bạn)
-        socket.emit('request', requestMessage);
+        clearTimeout(timeoutId);
 
-        // Tự động hủy nếu chờ quá 10 giây (10000ms)
-        setTimeout(() => {
-            if (pendingRequests.has(requestId)) {
-                pendingRequests.delete(requestId);
-                reject(new Error(`Command "${action}" timed out.`));
+        if (response.ok) {
+            const data = await response.json();
+            if (data.message === "REMOTE_SERVER_HERE") {
+                return ip; // Trả về IP ngay khi tìm thấy
             }
-        }, 10000);
-    });
+        }
+    } catch (e) {
+        // Lỗi kết nối hoặc timeout -> Bỏ qua
+        return null;
+    }
+    return null;
 };
 
-export const getSocket = () => socket;
+// 2. Kỹ thuật Batching (Chia lô để quét)
+export const scanForServer = async (baseIP: string = "192.168.1"): Promise<string | null> => {
+    console.log(`Đang quét mạng LAN dải ${baseIP}.x ...`);
+
+    // Chia 255 IP thành các lô, mỗi lô 20 IP
+    const BATCH_SIZE = 20;
+
+    for (let i = 1; i < 255; i += BATCH_SIZE) {
+        const batchPromises = [];
+
+        // Tạo một lô request
+        for (let j = 0; j < BATCH_SIZE; j++) {
+            const currentNum = i + j;
+            if (currentNum >= 255) break;
+
+            const ip = `${baseIP}.${currentNum}`;
+            batchPromises.push(checkIP(ip));
+        }
+
+        // Chạy song song lô này và chờ xong mới chạy lô tiếp theo
+        // Điều này giúp trình duyệt không bị quá tải
+        const results = await Promise.all(batchPromises);
+
+        // Kiểm tra xem trong lô này có IP nào phản hồi không
+        const foundIP = results.find(ip => ip !== null);
+
+        if (foundIP) {
+            console.log(`✅ Đã tìm thấy Server tại: ${foundIP}`);
+            return foundIP; // Tìm thấy là dừng ngay, không quét nữa
+        }
+    }
+
+    console.log("❌ Không tìm thấy Server nào.");
+    return null;
+};// Sửa lại hàm initSocket để nhận IP động
+export const initSocket = (serverIP: string): HubConnection => {
+    const SERVER_URL = `http://${serverIP}:5000/systemHub`;
+
+    console.log(`[SignalR] Đang kết nối tới: ${SERVER_URL}`);
+
+    connection = new HubConnectionBuilder()
+        .withUrl(SERVER_URL)
+        .withAutomaticReconnect()
+        .configureLogging(LogLevel.Information)
+        .build();
+
+    connection.start()
+        .then(() => {
+            console.log('[SignalR] Kết nối thành công tới Server C#!');
+            // alert("Kết nối thành công!"); // Có thể mở dòng này nếu muốn test
+        })
+        .catch((err) => {
+            console.error('[SignalR] Lỗi kết nối:', err);
+            // --- THÊM DÒNG NÀY ĐỂ NÓ BÁO LỖI RA MÀN HÌNH ---
+            alert("KHÔNG KẾT NỐI ĐƯỢC!\nLỗi chi tiết: " + err.toString());
+        });
+    return connection;
+};
+
+// Hàm lấy connection hiện tại (để các component khác dùng)
+export const getSocket = () => connection;
+
+/**
+ * Hàm gửi lệnh sang C#
+ * @param action Tên hành động (ví dụ: "start_keylog")
+ * @param payload Dữ liệu kèm theo (ví dụ: ID process cần kill)
+ */
+export const sendCommand = async (action: string, payload?: any) => {
+    if (!connection) throw new Error("Chưa kết nối tới Server!");
+
+    try {
+        console.log(`[Gửi lệnh] ${action}`, payload);
+
+        // Ánh xạ từ tên lệnh của Client sang tên hàm trong SystemHub.cs của Server
+        switch (action) {
+            case 'start_keylog':
+                await connection.invoke("StartKeylog");
+                break;
+            case 'stop_keylog':
+                await connection.invoke("StopKeylog");
+                break;
+            case 'take_screenshot':
+                await connection.invoke("TakeScreenshot");
+                break;
+            case 'shutdown':
+                await connection.invoke("ShutdownServer");
+                break;
+            case 'restart':
+                await connection.invoke("RestartServer");
+                break;
+            case 'list_processes':
+                await connection.invoke("GetProcesses");
+                break;
+            case 'kill_process':
+                // payload ở đây sẽ là PID (số)
+                await connection.invoke("KillProcess", Number(payload));
+                break;
+            case 'start_app':
+                // Payload chính là tên App (ví dụ: "notepad.exe")
+                await connection.invoke("StartApp", String(payload));
+                break;
+            // Registry (nếu payload là object chứa thông tin registry)
+            case 'registry_command':
+                if (payload) {
+                    await connection.invoke("SendRegistryCommand",
+                        payload.action, payload.link, payload.valueName, payload.value, payload.typeValue
+                    );
+                }
+                break;
+            case 'get_webcams':
+                await connection.invoke("GetWebcams");
+                break;
+            case 'start_webcam':
+                // payload ở đây là index của camera (số 0, 1, 2...)
+                await connection.invoke("StartWebcam", Number(payload));
+                break;
+
+            case 'stop_webcam':
+                await connection.invoke("StopWebcam");
+                break;
+            default:
+                console.warn("Lệnh không được hỗ trợ:", action);
+        }
+    } catch (err) {
+        console.error(`Lỗi khi gửi lệnh ${action}:`, err);
+        throw err;
+    }
+};

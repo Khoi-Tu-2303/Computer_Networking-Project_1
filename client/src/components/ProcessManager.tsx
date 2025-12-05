@@ -1,149 +1,198 @@
-﻿// src/components/ProcessManager.tsx
-import { useState } from 'react';
-import { RefreshCw, Play, XCircle } from 'lucide-react';
-import Tabs from './Tabs';
-// 1. Import hook và service
+﻿import { useState, useEffect } from 'react';
+import { RefreshCw, XCircle, Search, Layers, Cpu, Activity } from 'lucide-react';
+import { ApplicationsTab } from './ApplicationsTab';
 import { useSocket } from '../contexts/SocketContext';
 import { sendCommand } from '../services/socketService';
-// 2. Import kiểu dữ liệu từ file protocol (giả sử bạn đã tạo)
-import { Process, Application } from '../types'; // (Bạn có thể giữ type cũ)
-import { ApplicationsTab } from './ApplicationsTab';
-// 3. XÓA BỎ MOCK DATA (mockProcesses, mockApplications)
+import Tabs from './Tabs'; // <-- Import Component Tabs
+
+export interface ProcessInfo {
+    pid: number;
+    name: string;
+    title: string;
+    type: 'APP' | 'PROC';
+}
 
 export default function ProcessManager() {
-    const [activeTab, setActiveTab] = useState('processes');
-    const [processes, setProcesses] = useState<Process[]>([]);
-    // const [applications, setApplications] = useState<Application[]>([]); // Không cần nữa
+    // --- PHẦN NÃO (LOGIC) ---
+    const [activeTab, setActiveTab] = useState<'processes' | 'applications'>('processes');
+    const [processes, setProcesses] = useState<ProcessInfo[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    const { selectedAgentId } = useSocket();
+    const { socket, isConnected } = useSocket();
 
-    const handleRefreshProcesses = async () => {
-        if (!selectedAgentId) {
-            alert('Vui lòng chọn một Agent trước.');
-            setProcesses([]); // Xóa list nếu k có agent
-            return;
-        }
+    // Hàm Parse dữ liệu
+    const parseProcessData = (dataString: string[]): ProcessInfo[] => {
+        return dataString.map(str => {
+            const typeMatch = str.match(/^\[(APP|PROC)\]/);
+            const idMatch = str.match(/ID:(\d+)/);
+            const nameMatch = str.match(/Name:\s(.*?)\s\|/);
+            const titleMatch = str.match(/Title:\s(.*)$/);
+
+            return {
+                type: (typeMatch ? typeMatch[1] : 'PROC') as 'APP' | 'PROC',
+                pid: idMatch ? parseInt(idMatch[1]) : 0,
+                name: nameMatch ? nameMatch[1].trim() : 'Unknown',
+                title: titleMatch ? titleMatch[1].trim() : ''
+            };
+        });
+    };
+
+    useEffect(() => {
+        if (!socket) return;
+        socket.on("ReceiveProcessList", (data: string[]) => {
+            setProcesses(parseProcessData(data));
+            setIsLoading(false);
+        });
+        return () => { socket.off("ReceiveProcessList"); };
+    }, [socket]);
+
+    const handleRefresh = async () => {
+        if (!isConnected) return;
         setIsLoading(true);
         try {
-            const response = await sendCommand(
-                selectedAgentId,
-                'list_processes'
-            );
-            setProcesses(response.payload);
-        } catch (error: any) {
-            alert(`Lỗi khi lấy process: ${error.message}`);
-            setProcesses([]); // Xóa list nếu lỗi
+            await sendCommand('list_processes');
+        } catch (error) {
+            alert("Lỗi: " + error);
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     const handleKillProcess = async (pid: number) => {
-        if (!selectedAgentId) {
-            alert('Vui lòng chọn một Agent trước.');
-            return;
-        }
-        setIsLoading(true); // Bật loading
+        if (!window.confirm(`KILL PROCESS PID: ${pid}?`)) return;
         try {
-            await sendCommand(selectedAgentId, 'kill_process', { pid: pid });
-            // Thêm delay 500ms rồi refresh
-            setTimeout(handleRefreshProcesses, 500);
-        } catch (error: any) {
-            alert(`Lỗi khi kill process: ${error.message}`);
-            setIsLoading(false); // Tắt loading nếu lỗi
+            await sendCommand('kill_process', pid);
+            setTimeout(handleRefresh, 1000);
+        } catch (error) {
+            alert("Lỗi: " + error);
         }
-        // handleRefreshProcesses() sẽ tự tắt loading
     };
 
-    // (Bạn có thể cập nhật các hàm handleStartNewProcess, handleStartApp, handleStopApp
-    //  tương tự bằng cách dùng `sendCommand`...)
+    const filteredProcesses = processes.filter(p =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.pid.toString().includes(searchTerm)
+    );
 
-    // ... (Nội dung JSX của processesContent và applicationsContent) ...
+    // --- CHUẨN BỊ NỘI DUNG CHO TABS ---
 
+    // 1. Nội dung Tab Processes (Đóng gói vào biến)
     const processesContent = (
-        <div className="py-4"> {/* Thêm padding cho tab content */}
-            <div className="flex gap-3 mb-4">
+        <div className="flex-1 flex flex-col space-y-4 animate-fade-in h-full">
+            {/* Toolbar (Search + Refresh) */}
+            <div className="flex gap-2">
+                <div className="relative flex-1">
+                    <input
+                        type="text"
+                        placeholder="// SEARCH_PID_OR_NAME"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-black neon-border-green px-4 py-2 pl-10 rounded text-green-500 font-mono text-sm placeholder-green-500/30 focus:outline-none focus:shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all"
+                    />
+                    <Search className="absolute left-3 top-2.5 w-4 h-4 text-green-500/50" />
+                </div>
                 <button
-                    onClick={handleRefreshProcesses}
-                    disabled={isLoading || !selectedAgentId}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                    onClick={handleRefresh}
+                    disabled={isLoading || !isConnected}
+                    className="bg-black neon-border-cyan hover:bg-cyan-950/30 px-4 py-2 rounded transition-all duration-300 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center gap-2 disabled:opacity-50"
                 >
-                    <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                    {isLoading ? 'Đang tải...' : 'Refresh List'}
+                    <RefreshCw className={`w-4 h-4 text-cyan-500 ${isLoading ? 'animate-spin' : ''}`} />
+                    <span className="hidden md:inline text-cyan-500 font-bold text-sm">REFRESH</span>
                 </button>
-                {/* ... (Nút Start New Process) ... */}
             </div>
 
-            {/* Thông báo loading / rỗng */}
-            {isLoading && processes.length === 0 ? (
-                <p className="text-center text-gray-500">Đang tải danh sách processes...</p>
-            ) : !selectedAgentId ? (
-                <p className="text-center text-gray-500">Vui lòng chọn một agent để xem processes.</p>
-            ) : processes.length === 0 && !isLoading ? (
-                <p className="text-center text-gray-500">Không tìm thấy process nào (hoặc chưa tải).</p>
-            ) : (
-                // ****** THAY ĐỔI Ở ĐÂY ******
-                // Thêm max-h-[500px] (chiều cao tối đa 500px) và overflow-y-auto (cuộn dọc)
-                <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm max-h-[500px] overflow-y-auto relative">
-                    <table className="w-full border-collapse min-w-[600px]">
-                        {/* Thêm sticky top-0 để tiêu đề "dính" lại khi cuộn */}
-                        <thead className="bg-gray-50 sticky top-0 z-10">
-                            {/* ================================================ */}
-                            <tr className="bg-gray-50">
-                                <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700 border-b">Name</th>
-                                <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700 border-b">PID</th>
-                                <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700 border-b">Status</th>
-                                <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700 border-b">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {processes.map((process: any) => ( // Dùng 'any' nếu type chưa khớp
-                                <tr key={process.pid} className="border-b hover:bg-gray-50">
-                                    <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{process.name}</td>
-                                    <td className="px-4 py-3 text-sm text-gray-600">{process.pid}</td>
-                                    <td className="px-4 py-3">
-                                        <span
-                                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${process.status === 'Running' // (Kiểm tra xem agent có trả về status không)
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-yellow-100 text-yellow-800'
-                                                }`}
-                                        >
-                                            {process.status || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <button
-                                            onClick={() => handleKillProcess(process.pid)}
-                                            disabled={isLoading || !selectedAgentId} // Thêm disabled
-                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400"
-                                        >
-                                            <XCircle className="w-4 h-4" />
-                                            Kill
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {/* Bảng Dữ Liệu */}
+            <div className="terminal-window rounded-lg overflow-hidden flex-1 min-h-[400px]">
+                <div className="bg-black border-b border-green-500/30 p-3 sticky top-0 z-10">
+                    <div className="grid grid-cols-12 gap-4 text-xs font-bold text-green-500 uppercase tracking-wider">
+                        <div className="col-span-2">PID</div>
+                        <div className="col-span-5">PROCESS NAME</div>
+                        <div className="col-span-3">TYPE</div>
+                        <div className="col-span-2 text-center">ACTION</div>
+                    </div>
                 </div>
-            )}
+
+                <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                    {processes.length === 0 && !isLoading ? (
+                        <div className="p-8 text-center text-green-500/30 font-mono text-sm">
+                            {'> NO_DATA_AVAILABLE. PRESS_REFRESH.'}
+                        </div>
+                    ) : (
+                        filteredProcesses.map((proc, index) => (
+                            <div
+                                key={proc.pid}
+                                className={`grid grid-cols-12 gap-4 items-center p-2 text-xs border-b border-green-500/10 hover:bg-green-500/5 transition-colors group ${index % 2 === 0 ? 'bg-black/40' : 'bg-black/20'
+                                    }`}
+                            >
+                                <div className="col-span-2 text-cyan-500 font-mono">{proc.pid}</div>
+                                <div className="col-span-5 text-green-400 font-mono truncate" title={proc.name}>
+                                    {proc.name}
+                                </div>
+                                <div className="col-span-3">
+                                    <span className={`text-[10px] px-2 py-0.5 rounded border ${proc.type === 'APP'
+                                        ? 'border-blue-500 text-blue-400 bg-blue-500/10'
+                                        : 'border-gray-600 text-gray-500'
+                                        }`}>
+                                        {proc.type}
+                                    </span>
+                                </div>
+                                <div className="col-span-2 text-center">
+                                    <button
+                                        onClick={() => handleKillProcess(proc.pid)}
+                                        className="opacity-60 group-hover:opacity-100 hover:text-red-500 transition-all"
+                                        title="Kill Process"
+                                    >
+                                        <XCircle className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            {/* Footer Stats */}
+            <div className="flex justify-between items-center text-xs text-green-500/50 font-mono px-2">
+                <span>TOTAL_THREADS: {processes.length}</span>
+                <span>STATUS: {isLoading ? 'SYNCING...' : 'IDLE'}</span>
+            </div>
         </div>
     );
 
-    // Sử dụng component <ApplicationsTab /> trực tiếp
+    // 2. Nội dung Tab Applications
     const applicationsContent = (
-        <ApplicationsTab />
+        <ApplicationsTab allProcesses={processes} onRefresh={handleRefresh} />
     );
 
-    const tabs = [
-        { id: 'processes', label: 'Processes', content: processesContent },
-        { id: 'applications', label: 'Applications', content: applicationsContent },
+    // 3. Cấu hình mảng Tabs
+    const tabsData = [
+        {
+            id: 'processes',
+            label: 'ALL_PROCESSES',
+            icon: <Cpu size={16} />,
+            content: processesContent
+        },
+        {
+            id: 'applications',
+            label: 'APPLICATIONS',
+            icon: <Layers size={16} />,
+            content: applicationsContent
+        }
     ];
 
+    // --- PHẦN GIAO DIỆN CHÍNH ---
     return (
-        <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Process & App Manager</h2>
-            <Tabs activeTab={activeTab} onTabChange={setActiveTab} tabs={tabs} />
+        <div className="glass-panel p-6 rounded-lg h-full flex flex-col">
+            <h2 className="text-xl font-bold text-green-500 neon-glow-green tracking-wider flex items-center gap-2 mb-6">
+                <Activity className="w-6 h-6 text-green-500" />
+                {'> SYSTEM_TASKS_'}
+            </h2>
+
+            {/* GỌI COMPONENT TABS Ở ĐÂY */}
+            <Tabs
+                activeTab={activeTab}
+                onTabChange={(id) => setActiveTab(id as any)}
+                tabs={tabsData}
+            />
         </div>
     );
 }

@@ -1,3 +1,114 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        font-family: 'Share Tech Mono', monospace;
+        background-color: #000000;
+        color: #10b981; /* Xanh lá hacker */
+    }
+}
+
+@layer utilities {
+    .neon-glow-green {
+        text-shadow: 0 0 10px #10b981, 0 0 20px #10b981;
+    }
+
+    .neon-glow-red {
+        text-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444;
+    }
+
+    .neon-glow-cyan {
+        text-shadow: 0 0 10px #06b6d4, 0 0 20px #06b6d4;
+    }
+
+    .neon-border-green {
+        border: 1px solid #10b981;
+        box-shadow: 0 0 5px #10b981;
+    }
+
+    .neon-border-red {
+        border: 1px solid #ef4444;
+        box-shadow: 0 0 5px #ef4444;
+    }
+
+    .neon-border-cyan {
+        border: 1px solid #06b6d4;
+        box-shadow: 0 0 5px #06b6d4;
+    }
+
+    .glass-panel {
+        background: rgba(10, 10, 10, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+    }
+
+    .terminal-window {
+        background: #000000;
+        border: 1px solid #10b981;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.3), inset 0 0 15px rgba(16, 185, 129, 0.05);
+    }
+
+    .scan-line {
+        position: relative;
+        overflow: hidden;
+    }
+
+        .scan-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(transparent, #10b981);
+            animation: scan 4s linear infinite;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+    @keyframes scan {
+        0% {
+            transform: translateY(0);
+        }
+
+        100% {
+            transform: translateY(100vh);
+        }
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0a0a;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #059669;
+}
+
+.bg-grid-pattern {
+    background-image: linear-gradient(to right, rgba(16, 185, 129, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px; /* Tạo ô lưới 40px */
+}
+
+/* Hiệu ứng bóng chữ Neon */
+.text-shadow-neon {
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3);
+}

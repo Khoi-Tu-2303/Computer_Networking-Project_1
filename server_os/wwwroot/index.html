@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote System Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #10b981 #1a1a1a;
+        }
+
+        .terminal-font {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .glow-green {
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .log-entry {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-black text-gray-100 min-h-screen terminal-font">
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+
+        <header class="mb-6 border-b-2 border-green-500 pb-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-green-500 glow-green tracking-wider">▸ REMOTE SYSTEM MONITOR</h1>
+                    <p class="text-gray-500 text-sm mt-1">REAL-TIME DASHBOARD | SIGNALR CORE</p>
+                </div>
+                <div class="flex items-center gap-6 bg-gray-900 px-4 py-3 rounded border border-gray-800">
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-400 text-sm">SERVER IP:</span>
+                        <span class="text-green-400 font-bold" id="server-ip">Detecting...</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-red-500 rounded-full" id="status-indicator"></span>
+                        <span class="text-gray-400 font-bold" id="server-status">OFFLINE</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="mb-6 bg-gray-900 border border-gray-800 rounded-lg p-6">
+            <h2 class="text-xl text-green-400 mb-4 flex items-center gap-2">
+                <i data-lucide="settings" class="w-5 h-5"></i> CONTROL PANEL
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex items-center justify-between bg-black border border-gray-800 rounded p-4">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="wifi" class="w-5 h-5 text-green-400"></i>
+                        <span class="text-gray-300">ACCEPT INCOMING CONNECTIONS</span>
+                    </div>
+                    <button id="connection-toggle" class="relative inline-flex h-8 w-16 items-center rounded-full bg-green-600 transition-colors">
+                        <span id="toggle-slider" class="inline-block h-6 w-6 transform rounded-full bg-white transition-transform translate-x-9"></span>
+                    </button>
+                </div>
+                <div class="flex items-center bg-black border border-gray-800 rounded p-4">
+                    <button id="disconnect-all-btn" class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors border border-red-500">
+                        <i data-lucide="power" class="w-5 h-5"></i> EMERGENCY SHUTDOWN
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-gray-900 border border-gray-800 rounded-lg p-5">
+                <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">TOTAL CONNECTIONS</span><i data-lucide="users" class="w-4 h-4 text-blue-400"></i></div>
+                <div class="text-3xl font-bold text-blue-400" id="active-connections">0</div>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 rounded-lg p-5">
+                <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">CPU LOAD</span><i data-lucide="cpu" class="w-4 h-4 text-green-400"></i></div>
+                <div class="text-3xl font-bold text-green-400" id="cpu-percentage">0%</div>
+                <div class="w-full bg-gray-800 rounded-full h-2 mt-2"><div id="cpu-bar" class="bg-green-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 rounded-lg p-5">
+                <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">RAM USAGE</span><i data-lucide="memory-stick" class="w-4 h-4 text-cyan-400"></i></div>
+                <div class="text-3xl font-bold text-cyan-400" id="ram-percentage">0%</div>
+                <div class="w-full bg-gray-800 rounded-full h-2 mt-2"><div id="ram-bar" class="bg-cyan-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden neon-border">
+                <div class="bg-black border-b border-gray-800 px-4 py-3 flex justify-between">
+                    <h3 class="text-green-400 font-bold flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4"></i> SYSTEM EVENTS LOG</h3>
+                    <button id="clear-logs-btn" class="text-gray-500 hover:text-gray-300 text-xs">[CLEAR]</button>
+                </div>
+                <div id="log-container" class="bg-black p-4 h-96 overflow-y-auto text-sm"></div>
+            </div>
+
+            <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden neon-border">
+                <div class="bg-black border-b border-gray-800 px-4 py-3 flex justify-between">
+                    <h3 class="text-green-400 font-bold flex items-center gap-2"><i data-lucide="monitor" class="w-4 h-4"></i> CONNECTED DEVICES</h3>
+                    <span class="text-gray-500 text-xs">MONITORING</span>
+                </div>
+                <div class="overflow-x-auto h-96">
+                    <table class="w-full text-sm" id="clients-table">
+                        <thead class="bg-black text-green-400 sticky top-0">
+                            <tr>
+                                <th class="px-4 py-3 text-left">DEVICE NAME</th>
+                                <th class="px-4 py-3 text-left">IP ADDRESS</th>
+                                <th class="px-4 py-3 text-left">STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clients-tbody" class="divide-y divide-gray-800">
+                            <tr><td colspan="3" class="text-center py-8 text-gray-600 italic">Waiting for connections...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        document.getElementById('server-ip').innerText = window.location.hostname;
+
+        let isSystemLocked = false;
+        let myConnectionId = ""; // Lưu ID của chính Dashboard để phân biệt
+
+        // --- KẾT NỐI SIGNALR ---
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/systemHub")
+            .withAutomaticReconnect()
+            .build();
+
+        // 1. Nhận Log
+        connection.on("ReceiveLog", (msg) => {
+            let level = "INFO";
+            if (msg.includes("STOPPED") || msg.includes("BLOCKED") || msg.includes("Disconnected")) level = "WARN";
+            if (msg.includes("New connection")) level = "NET";
+            if (msg.includes("LOCKED")) level = "SEC";
+            addLog(level, msg);
+        });
+
+        // 2. CẬP NHẬT DANH SÁCH ID THẬT (Thay cho UpdateClientCount cũ)
+        connection.on("UpdateClientList", (listIDs) => {
+            // listIDs là một mảng các chuỗi: ["abc...", "xyz..."]
+
+            // Cập nhật số lượng
+            document.getElementById("active-connections").innerText = listIDs.length;
+
+            // Vẽ lại bảng
+            updateClientTableReal(listIDs);
+        });
+
+        // 3. Cập nhật trạng thái khóa
+        connection.on("UpdateSystemStatus", (isLocked) => {
+            isSystemLocked = isLocked;
+            updateToggleUI(isLocked);
+        });
+
+        connection.on("ReceiveScreenshot", () => addLog("DATA", "📸 Received Screenshot data"));
+        connection.on("ReceiveProcessList", () => addLog("DATA", "📋 Process List generated"));
+
+        // --- XỬ LÝ NÚT GẠT ---
+        const toggleBtn = document.getElementById('connection-toggle');
+        const toggleSlider = document.getElementById('toggle-slider');
+
+        function updateToggleUI(locked) {
+            if (!locked) {
+                toggleBtn.classList.replace('bg-gray-600', 'bg-green-600');
+                toggleSlider.classList.replace('translate-x-1', 'translate-x-9');
+            } else {
+                toggleBtn.classList.replace('bg-green-600', 'bg-gray-600');
+                toggleSlider.classList.replace('translate-x-9', 'translate-x-1');
+            }
+        }
+
+        toggleBtn.addEventListener('click', async () => {
+            const newState = !isSystemLocked;
+            try {
+                await connection.invoke("ToggleSystemLock", newState);
+            } catch (err) {
+                addLog("ERR", "Lỗi gửi lệnh khóa: " + err.toString());
+            }
+        });
+
+        // --- HÀM UI ---
+        function addLog(level, message) {
+            const logContainer = document.getElementById('log-container');
+            const time = new Date().toLocaleTimeString();
+            const colors = { 'INFO': 'text-green-400', 'WARN': 'text-yellow-400', 'ERR': 'text-red-400', 'CMD': 'text-cyan-400', 'NET': 'text-blue-400', 'SEC': 'text-purple-400' };
+            const div = document.createElement('div');
+            div.className = 'log-entry text-gray-400 border-b border-gray-800 py-1';
+            div.innerHTML = `[${time}] <span class="${colors[level] || 'text-white'} font-bold">${level}</span> | ${message}`;
+            logContainer.appendChild(div);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // HÀM VẼ BẢNG ID THẬT
+        function updateClientTableReal(clients) { // Đổi tên tham số từ ids thành clients
+            const tbody = document.getElementById("clients-tbody");
+            if (!tbody) return;
+            tbody.innerHTML = "";
+
+            if (!clients || clients.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-gray-600 italic">No active connections</td></tr>`;
+                return;
+            }
+
+            clients.forEach(client => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-gray-800 transition-colors border-b border-gray-800";
+
+                // Kiểm tra xem đây có phải là chính Dashboard không
+                // client.connectionId là trường dữ liệu từ C# gửi xuống (viết hoa chữ cái đầu ConnectionId -> connectionId khi sang JS thường thành chữ thường, nhưng SignalR giữ nguyên case nếu không config)
+                // Tốt nhất là log ra xem cấu trúc object: console.log(client);
+
+                const isMe = (client.connectionId === myConnectionId);
+
+                // Màu sắc icon
+                const iconColor = isMe ? "text-purple-400" : "text-blue-400";
+                const rowClass = isMe ? "font-bold text-purple-300" : "text-gray-300";
+
+                // IP thật từ Server
+                const displayIP = client.ipAddress || "Unknown";
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 ${rowClass} flex items-center gap-2">
+                        <i data-lucide="monitor" class="w-4 h-4 ${iconColor}"></i> 
+                        ${client.name} ${isMe ? "(YOU)" : ""}
+                    </td>
+                    <td class="px-4 py-3 text-gray-500 font-mono">${displayIP}</td>
+                    <td class="px-4 py-3">
+                        <span class="text-green-400 text-xs flex items-center gap-1">
+                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> 
+                            Online
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (window.lucide) lucide.createIcons();
+        }
+        // --- KHỞI ĐỘNG ---
+        async function startApp() {
+            try {
+                await connection.start();
+
+                // Lấy ID của chính mình để nhận diện
+                myConnectionId = connection.connectionId;
+
+                const indicator = document.getElementById("status-indicator");
+                const statusText = document.getElementById("server-status");
+                indicator.classList.remove("bg-red-500");
+                indicator.classList.add("bg-green-500", "status-pulse");
+                statusText.innerText = "ONLINE";
+                statusText.classList.replace("text-gray-400", "text-green-400");
+                addLog("INFO", "Monitor Connected. My ID: " + myConnectionId);
+            } catch (err) {
+                console.error(err);
+                setTimeout(startApp, 5000);
+            }
+        }
+
+        // Fake Stats
+        setInterval(() => {
+            const cpu = Math.floor(Math.random() * 30) + 5;
+            const ram = Math.floor(Math.random() * 10) + 40;
+            document.getElementById('cpu-percentage').innerText = cpu + "%";
+            document.getElementById('cpu-bar').style.width = cpu + "%";
+            document.getElementById('ram-percentage').innerText = ram + "%";
+            document.getElementById('ram-bar').style.width = ram + "%";
+        }, 2000);
+
+        document.getElementById('clear-logs-btn').addEventListener('click', () => {
+            document.getElementById('log-container').innerHTML = '';
+        });
+
+        document.getElementById('disconnect-all-btn').addEventListener('click', async () => {
+            if (confirm("Dừng Server ngay lập tức?")) {
+                try { await connection.invoke("EmergencyShutdown"); } catch (e) { console.error(e); }
+            }
+        });
+
+        startApp();
+    </script>
+</body>
+</html>

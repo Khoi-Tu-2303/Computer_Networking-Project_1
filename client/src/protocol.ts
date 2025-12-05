@@ -1,46 +1,5 @@
-export type ProtocolVersion = '1.0';
+﻿// file: src/protocol.ts
 
-
-export type MessageType = 'request' | 'response' | 'event';
-
-
-export interface MessageMeta {
-    timestamp: number;
-    origin?: string;
-    agentId?: string;
-}
-
-
-export interface BaseMessage {
-    protocolVersion: ProtocolVersion;
-    id: string;
-    type: MessageType;
-    meta?: MessageMeta;
-}
-
-
-export interface RequestMessage extends BaseMessage {
-    type: 'request';
-    action: string;
-    payload?: any;
-    auth?: { token?: string };
-}
-
-
-export interface ResponseMessage extends BaseMessage {
-    type: 'response';
-    status: 'ok' | 'error';
-    payload?: any;
-    error?: { code: string; message: string; details?: any } | null;
-}
-
-
-export interface EventMessage extends BaseMessage {
-    type: 'event';
-    event: string;
-    payload?: any;
-}
-
-
-// Convenience union
-export type AnyMessage = RequestMessage | ResponseMessage | EventMessage;
+// File này hiện tại không còn được sử dụng do đã chuyển sang SignalR.
+// Giữ lại để tránh lỗi import (nếu có).
+export type ProtocolVersion = '2.0';
