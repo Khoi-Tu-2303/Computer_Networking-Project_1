@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Project\\server_os\\server_os.csproj": {}
+    "D:\\Project\\server_\\server\\server_os.csproj": {}
   },
   "projects": {
-    "D:\\Project\\server_os\\server_os.csproj": {
+    "D:\\Project\\server_\\server\\server_os.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Project\\server_os\\server_os.csproj",
+        "projectUniqueName": "D:\\Project\\server_\\server\\server_os.csproj",
         "projectName": "server_os",
-        "projectPath": "D:\\Project\\server_os\\server_os.csproj",
+        "projectPath": "D:\\Project\\server_\\server\\server_os.csproj",
         "packagesPath": "C:\\Users\\ADMIN\\.nuget\\packages\\",
-        "outputPath": "D:\\Project\\server_os\\obj\\",
+        "outputPath": "D:\\Project\\server_\\server\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "Dpk32Vk1wuLQAsmDSGMwza//JoiISQVXmMhNTYhFt20=",
+  "Hash": "RSxVU+8nm7OTUhomXeF2+QvRSYiat8BFV78p6sVG4+g=",
   "Source": "server_os",
   "BasePath": "_content/server_os",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "server_os\\wwwroot",
       "Source": "server_os",
-      "ContentRoot": "D:\\Project\\server_os\\wwwroot\\",
+      "ContentRoot": "D:\\Project\\server_\\server\\wwwroot\\",
       "BasePath": "_content/server_os",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "D:\\Project\\server_os\\wwwroot\\index.html",
+      "Identity": "D:\\Project\\server_\\server\\wwwroot\\index.html",
       "SourceId": "server_os",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Project\\server_os\\wwwroot\\",
+      "ContentRoot": "D:\\Project\\server_\\server\\wwwroot\\",
       "BasePath": "_content/server_os",
       "RelativePath": "index.html",
       "AssetKind": "All",
@@ -36,10 +36,10 @@
       "OriginalItemSpec": "wwwroot\\index.html"
     },
     {
-      "Identity": "D:\\Project\\server_os\\wwwroot\\style.css",
+      "Identity": "D:\\Project\\server_\\server\\wwwroot\\style.css",
       "SourceId": "server_os",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Project\\server_os\\wwwroot\\",
+      "ContentRoot": "D:\\Project\\server_\\server\\wwwroot\\",
       "BasePath": "_content/server_os",
       "RelativePath": "style.css",
       "AssetKind": "All",

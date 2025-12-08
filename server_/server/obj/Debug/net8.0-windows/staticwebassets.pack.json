@@ -1,11 +1,11 @@
 {
   "Files": [
     {
-      "Id": "D:\\Project\\server_os\\wwwroot\\index.html",
+      "Id": "D:\\Project\\server_\\server\\wwwroot\\index.html",
       "PackagePath": "staticwebassets\\index.html"
     },
     {
-      "Id": "D:\\Project\\server_os\\wwwroot\\style.css",
+      "Id": "D:\\Project\\server_\\server\\wwwroot\\style.css",
       "PackagePath": "staticwebassets\\style.css"
     },
     {

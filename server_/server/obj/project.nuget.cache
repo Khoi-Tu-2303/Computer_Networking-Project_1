@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "S4bOSDO3sBc=",
+  "dgSpecHash": "fsaWtMYL3Iw=",
   "success": true,
-  "projectFilePath": "D:\\Project\\server_os\\server_os.csproj",
+  "projectFilePath": "D:\\Project\\server_\\server\\server_os.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ADMIN\\.nuget\\packages\\aforge\\2.2.5\\aforge.2.2.5.nupkg.sha512",
     "C:\\Users\\ADMIN\\.nuget\\packages\\aforge.video\\2.2.5\\aforge.video.2.2.5.nupkg.sha512",
