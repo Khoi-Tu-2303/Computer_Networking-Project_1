@@ -1,8 +1,12 @@
 {
   "ExpandedNodes": [
     "",
-    "\\client"
+    "\\client_",
+    "\\client_\\client",
+    "\\client_\\client\\src",
+    "\\client_\\client\\src\\contexts",
+    "\\client_\\IpAgent"
   ],
-  "SelectedNode": "\\client\\tsconfig.app.json",
+  "SelectedNode": "\\client_\\run_client.bat",
   "PreviewInSolutionExplorer": false
 }

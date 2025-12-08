@@ -1,0 +1,17 @@
+D:\Project\client_\IpAgent\bin\Debug\net8.0\IpAgent.exe
+D:\Project\client_\IpAgent\bin\Debug\net8.0\IpAgent.deps.json
+D:\Project\client_\IpAgent\bin\Debug\net8.0\IpAgent.runtimeconfig.json
+D:\Project\client_\IpAgent\bin\Debug\net8.0\IpAgent.dll
+D:\Project\client_\IpAgent\bin\Debug\net8.0\IpAgent.pdb
+D:\Project\client_\IpAgent\bin\Debug\net8.0\Fleck.dll
+D:\Project\client_\IpAgent\obj\Debug\net8.0\IpAgent.csproj.AssemblyReference.cache
+D:\Project\client_\IpAgent\obj\Debug\net8.0\IpAgent.GeneratedMSBuildEditorConfig.editorconfig
+D:\Project\client_\IpAgent\obj\Debug\net8.0\IpAgent.AssemblyInfoInputs.cache
+D:\Project\client_\IpAgent\obj\Debug\net8.0\IpAgent.AssemblyInfo.cs
+D:\Project\client_\IpAgent\obj\Debug\net8.0\IpAgent.csproj.CoreCompileInputs.cache
+D:\Project\client_\IpAgent\obj\Debug\net8.0\IpAgent.csproj.Up2Date
+D:\Project\client_\IpAgent\obj\Debug\net8.0\IpAgent.dll
+D:\Project\client_\IpAgent\obj\Debug\net8.0\refint\IpAgent.dll
+D:\Project\client_\IpAgent\obj\Debug\net8.0\IpAgent.pdb
+D:\Project\client_\IpAgent\obj\Debug\net8.0\IpAgent.genruntimeconfig.cache
+D:\Project\client_\IpAgent\obj\Debug\net8.0\ref\IpAgent.dll

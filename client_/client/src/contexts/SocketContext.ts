@@ -100,60 +100,96 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     // 2. HÀM QUÉT MẠNG (ĐÃ TỐI ƯU GỢI Ý IP)
-    const startScan = async (manualBaseIP?: any) => {
+    const getIpFromLocalAgent = (): Promise<string | null> => {
+        return new Promise((resolve) => {
+            try {
+                // Kết nối vào cổng 9999 của máy local
+                const ws = new WebSocket('ws://127.0.0.1:9999');
+
+                // Set timeout 1 giây: Nếu Tool không bật thì bỏ qua nhanh
+                const timeout = setTimeout(() => {
+                    ws.close();
+                    resolve(null);
+                }, 1000);
+
+                ws.onopen = () => {
+                    console.log("Connected to IP Agent...");
+                };
+
+                ws.onmessage = (event) => {
+                    clearTimeout(timeout);
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data && data.prefix) {
+                            console.log("✅ AGENT đã chỉ điểm IP:", data.ip);
+                            resolve(data.prefix); // Trả về prefix (VD: 192.168.1)
+                        } else {
+                            resolve(null);
+                        }
+                    } catch { resolve(null); }
+                    ws.close(); // Lấy được tin rồi thì đóng
+                };
+
+                ws.onerror = () => {
+                    clearTimeout(timeout);
+                    // console.warn("Agent chưa bật, chuyển sang nhập tay.");
+                    resolve(null);
+                };
+
+            } catch (e) {
+                resolve(null);
+            }
+        });
+    };
+
+    // --- SỬA LẠI HÀM SCAN ---
+    const startScan = async (manualBaseIP?: string) => {
         if (isConnected) return;
         setIsScanning(true);
         let baseIP = "";
 
+        // 1. Nếu người dùng nhập tay vào ô Input -> Dùng luôn
         if (typeof manualBaseIP === 'string' && manualBaseIP.length > 0) {
             baseIP = manualBaseIP;
         } else {
-            const myHostname = window.location.hostname;
+            // 2. Nếu không nhập tay -> Hỏi Tool Agent
+            let suggestedPrefix = await getIpFromLocalAgent();
 
-            // Nếu đang chạy localhost, dùng "mẹo" WebRTC để đoán IP
-            if (myHostname === 'localhost' || myHostname === '127.0.0.1') {
-
-                // Thử lấy IP thật
-                const detectedIP = await detectLocalIP();
-                let suggestedPrefix = "192.168.1"; // Mặc định nếu không tìm thấy
-
-                if (detectedIP) {
-                    // Nếu tìm thấy (VD: 10.29.160.5) -> cắt lấy prefix "10.29.160"
-                    const parts = detectedIP.split('.');
-                    if (parts.length === 4) {
-                        suggestedPrefix = parts.slice(0, 3).join('.');
-                    }
-                }
-
-                // Hiện Prompt với gợi ý cực chuẩn
-                const userInput = prompt(`Phát hiện bạn đang chạy Localhost.\nDải IP LAN của bạn có thể là: ${suggestedPrefix}\nNhập dải IP để quét:`, suggestedPrefix);
-
-                if (!userInput) { setIsScanning(false); return; }
-                baseIP = userInput.trim();
-
-                // Fix lỗi người dùng nhập dư số cuối
-                if (baseIP.split('.').length === 4) {
-                    baseIP = baseIP.substring(0, baseIP.lastIndexOf('.'));
-                }
-
-            } else {
-                // Nếu truy cập bằng IP (VD: 10.29.160.5:5173) thì lấy luôn prefix đó
-                const parts = myHostname.split('.');
-                if (parts.length === 4) {
-                    baseIP = parts.slice(0, 3).join('.');
-                } else {
-                    baseIP = myHostname.substring(0, myHostname.lastIndexOf('.'));
-                }
+            // 3. Nếu Tool Agent chưa bật -> Thử dùng WebRTC (Backup)
+            if (!suggestedPrefix) {
+                // (Chỗ này bạn có thể gọi hàm detectLocalIP() cũ nếu muốn, hoặc bỏ qua)
+                // suggestedPrefix = await detectMyOwnIP(); 
+                suggestedPrefix = "192.168.1"; // Fallback cuối cùng
             }
+
+            const userInput = prompt(
+                suggestedPrefix !== "192.168.1"
+                    ? `✅ Đã phát hiện mạng LAN!\nGợi ý dải mạng: ${suggestedPrefix}\nNhập để quét:`
+                    : `⚠️ Không tìm thấy IP Agent (Chưa bật Tool?).\nVui lòng nhập dải IP LAN:`,
+                suggestedPrefix
+            );
+
+            if (!userInput) { setIsScanning(false); return; }
+            baseIP = userInput.trim();
         }
 
+        // Xử lý chuỗi (bỏ số cuối nếu có)
+        if (baseIP.split('.').length === 4) {
+            baseIP = baseIP.substring(0, baseIP.lastIndexOf('.'));
+        }
+
+        console.log("Bắt đầu quét dải:", baseIP);
         const foundIP = await scanForServer(baseIP);
+
         if (foundIP) {
             connectToIp(foundIP);
         } else {
-            alert(`Không tìm thấy Server nào trong dải ${baseIP}.x !`);
+            alert(`Không tìm thấy Server trong dải ${baseIP}.x !`);
         }
         setIsScanning(false);
+    };
+    const selectAgent = (agentId: string) => {
+        setSelectedAgentId(agentId);
     };
 
     const selectAgent = (agentId: string) => {
