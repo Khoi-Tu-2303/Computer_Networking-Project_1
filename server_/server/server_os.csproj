@@ -11,6 +11,7 @@
   <ItemGroup>
     <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="10.0.1" />
   </ItemGroup>
 
 </Project>

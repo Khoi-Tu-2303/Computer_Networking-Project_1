@@ -104,14 +104,19 @@
                 <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">TOTAL CONNECTIONS</span><i data-lucide="users" class="w-4 h-4 text-blue-400"></i></div>
                 <div class="text-3xl font-bold text-blue-400" id="active-connections">0</div>
             </div>
+
             <div class="bg-gray-900 border border-gray-800 rounded-lg p-5">
-                <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">CPU LOAD</span><i data-lucide="cpu" class="w-4 h-4 text-green-400"></i></div>
+                <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">CPU LOAD (SYSTEM)</span><i data-lucide="cpu" class="w-4 h-4 text-green-400"></i></div>
                 <div class="text-3xl font-bold text-green-400" id="cpu-percentage">0%</div>
                 <div class="w-full bg-gray-800 rounded-full h-2 mt-2"><div id="cpu-bar" class="bg-green-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div></div>
             </div>
+
             <div class="bg-gray-900 border border-gray-800 rounded-lg p-5">
-                <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">RAM USAGE</span><i data-lucide="memory-stick" class="w-4 h-4 text-cyan-400"></i></div>
-                <div class="text-3xl font-bold text-cyan-400" id="ram-percentage">0%</div>
+                <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">RAM USAGE (SYSTEM)</span><i data-lucide="memory-stick" class="w-4 h-4 text-cyan-400"></i></div>
+                <div class="flex items-baseline gap-2">
+                    <div class="text-3xl font-bold text-cyan-400" id="ram-percentage">0%</div>
+                    <div class="text-xs text-gray-500" id="ram-details">0 / 0 GB</div>
+                </div>
                 <div class="w-full bg-gray-800 rounded-full h-2 mt-2"><div id="ram-bar" class="bg-cyan-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div></div>
             </div>
         </section>
@@ -153,15 +158,13 @@
         document.getElementById('server-ip').innerText = window.location.hostname;
 
         let isSystemLocked = false;
-        let myConnectionId = ""; // Lưu ID của chính Dashboard để phân biệt
+        let myConnectionId = "";
 
-        // --- KẾT NỐI SIGNALR ---
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/systemHub")
             .withAutomaticReconnect()
             .build();
 
-        // 1. Nhận Log
         connection.on("ReceiveLog", (msg) => {
             let level = "INFO";
             if (msg.includes("STOPPED") || msg.includes("BLOCKED") || msg.includes("Disconnected")) level = "WARN";
@@ -170,27 +173,39 @@
             addLog(level, msg);
         });
 
-        // 2. CẬP NHẬT DANH SÁCH ID THẬT (Thay cho UpdateClientCount cũ)
         connection.on("UpdateClientList", (listIDs) => {
-            // listIDs là một mảng các chuỗi: ["abc...", "xyz..."]
-
-            // Cập nhật số lượng
             document.getElementById("active-connections").innerText = listIDs.length;
-
-            // Vẽ lại bảng
             updateClientTableReal(listIDs);
         });
 
-        // 3. Cập nhật trạng thái khóa
         connection.on("UpdateSystemStatus", (isLocked) => {
             isSystemLocked = isLocked;
             updateToggleUI(isLocked);
         });
 
+        // 4. HỨNG DỮ LIỆU THẬT TỪ SERVER (NEW)
+        connection.on("ReceiveSystemStats", (stats) => {
+            // stats = { cpu: 12.5, ramUsed: 4096, ramTotal: 16384 }
+
+            // Update CPU
+            const cpuVal = stats.cpu + "%";
+            document.getElementById('cpu-percentage').innerText = cpuVal;
+            document.getElementById('cpu-bar').style.width = cpuVal;
+
+            // Update RAM
+            const ramPercent = Math.round((stats.ramUsed / stats.ramTotal) * 100);
+            document.getElementById('ram-percentage').innerText = ramPercent + "%";
+            document.getElementById('ram-bar').style.width = ramPercent + "%";
+
+            // Chi tiết RAM (GB)
+            const usedGB = (stats.ramUsed / 1024).toFixed(1);
+            const totalGB = (stats.ramTotal / 1024).toFixed(0);
+            document.getElementById('ram-details').innerText = `${usedGB} / ${totalGB} GB`;
+        });
+
         connection.on("ReceiveScreenshot", () => addLog("DATA", "📸 Received Screenshot data"));
         connection.on("ReceiveProcessList", () => addLog("DATA", "📋 Process List generated"));
 
-        // --- XỬ LÝ NÚT GẠT ---
         const toggleBtn = document.getElementById('connection-toggle');
         const toggleSlider = document.getElementById('toggle-slider');
 
@@ -206,14 +221,10 @@
 
         toggleBtn.addEventListener('click', async () => {
             const newState = !isSystemLocked;
-            try {
-                await connection.invoke("ToggleSystemLock", newState);
-            } catch (err) {
-                addLog("ERR", "Lỗi gửi lệnh khóa: " + err.toString());
-            }
+            try { await connection.invoke("ToggleSystemLock", newState); }
+            catch (err) { addLog("ERR", "Lỗi gửi lệnh khóa: " + err.toString()); }
         });
 
-        // --- HÀM UI ---
         function addLog(level, message) {
             const logContainer = document.getElementById('log-container');
             const time = new Date().toLocaleTimeString();
@@ -225,8 +236,7 @@
             logContainer.scrollTop = logContainer.scrollHeight;
         }
 
-        // HÀM VẼ BẢNG ID THẬT
-        function updateClientTableReal(clients) { // Đổi tên tham số từ ids thành clients
+        function updateClientTableReal(clients) {
             const tbody = document.getElementById("clients-tbody");
             if (!tbody) return;
             tbody.innerHTML = "";
@@ -239,46 +249,33 @@
             clients.forEach(client => {
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-gray-800 transition-colors border-b border-gray-800";
-
-                // Kiểm tra xem đây có phải là chính Dashboard không
-                // client.connectionId là trường dữ liệu từ C# gửi xuống (viết hoa chữ cái đầu ConnectionId -> connectionId khi sang JS thường thành chữ thường, nhưng SignalR giữ nguyên case nếu không config)
-                // Tốt nhất là log ra xem cấu trúc object: console.log(client);
-
                 const isMe = (client.connectionId === myConnectionId);
-
-                // Màu sắc icon
                 const iconColor = isMe ? "text-purple-400" : "text-blue-400";
                 const rowClass = isMe ? "font-bold text-purple-300" : "text-gray-300";
-
-                // IP thật từ Server
                 const displayIP = client.ipAddress || "Unknown";
 
                 tr.innerHTML = `
-                    <td class="px-4 py-3 ${rowClass} flex items-center gap-2">
-                        <i data-lucide="monitor" class="w-4 h-4 ${iconColor}"></i> 
-                        ${client.name} ${isMe ? "(YOU)" : ""}
-                    </td>
-                    <td class="px-4 py-3 text-gray-500 font-mono">${displayIP}</td>
-                    <td class="px-4 py-3">
-                        <span class="text-green-400 text-xs flex items-center gap-1">
-                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> 
-                            Online
-                        </span>
-                    </td>
-                `;
+                        <td class="px-4 py-3 ${rowClass} flex items-center gap-2">
+                            <i data-lucide="monitor" class="w-4 h-4 ${iconColor}"></i>
+                            ${client.name} ${isMe ? "(YOU)" : ""}
+                        </td>
+                        <td class="px-4 py-3 text-gray-500 font-mono">${displayIP}</td>
+                        <td class="px-4 py-3">
+                            <span class="text-green-400 text-xs flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                Online
+                            </span>
+                        </td>
+                    `;
                 tbody.appendChild(tr);
             });
-
             if (window.lucide) lucide.createIcons();
         }
-        // --- KHỞI ĐỘNG ---
+
         async function startApp() {
             try {
                 await connection.start();
-
-                // Lấy ID của chính mình để nhận diện
                 myConnectionId = connection.connectionId;
-
                 const indicator = document.getElementById("status-indicator");
                 const statusText = document.getElementById("server-status");
                 indicator.classList.remove("bg-red-500");
@@ -292,15 +289,8 @@
             }
         }
 
-        // Fake Stats
-        setInterval(() => {
-            const cpu = Math.floor(Math.random() * 30) + 5;
-            const ram = Math.floor(Math.random() * 10) + 40;
-            document.getElementById('cpu-percentage').innerText = cpu + "%";
-            document.getElementById('cpu-bar').style.width = cpu + "%";
-            document.getElementById('ram-percentage').innerText = ram + "%";
-            document.getElementById('ram-bar').style.width = ram + "%";
-        }, 2000);
+        // XÓA ĐOẠN FAKE STATS CŨ
+        // setInterval(...) => Đã xóa
 
         document.getElementById('clear-logs-btn').addEventListener('click', () => {
             document.getElementById('log-container').innerHTML = '';

@@ -1,16 +1,14 @@
 ﻿using Fleck;
 using System.Net;
 using System.Net.Sockets;
-using System.Net.NetworkInformation; // Thư viện mới để lọc Card mạng
+using System.Net.NetworkInformation;
+using System.Threading; // <-- Thêm thư viện này để dùng Thread.Sleep
 
 class Program
 {
     static void Main()
     {
-        // 1. Lấy IP thật (Đã lọc bỏ VMware)
         string ip = GetLocalIP();
-
-        // 2. Tạo prefix
         string prefix = "";
         if (!string.IsNullOrEmpty(ip))
         {
@@ -30,38 +28,40 @@ class Program
 
         server.Start(socket => {
             socket.OnOpen = () => {
-                Console.WriteLine("-> Web Client da ket noi! Dang gui IP...");
-                socket.Send($"{{\"ip\":\"{ip}\", \"prefix\":\"{prefix}\"}}");
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Client connected!");
+
+                // CHIẾN THUẬT SPAM: Gửi 5 lần liên tiếp để đảm bảo Client bắt được
+                // Dù máy chậm hay nhanh cũng sẽ dính ít nhất 1 phát
+                new Thread(() => {
+                    for (int i = 1; i <= 5; i++)
+                    {
+                        if (!socket.IsAvailable) break;
+                        socket.Send($"{{\"ip\":\"{ip}\", \"prefix\":\"{prefix}\"}}");
+                        Console.WriteLine($"   -> Gửi gói tin #{i}...");
+                        Thread.Sleep(100); // Nghỉ 100ms rồi gửi tiếp
+                    }
+                    Console.WriteLine("   -> Hoan tat gui IP.");
+                }).Start();
             };
         });
 
         Console.ReadLine();
     }
 
-    // HÀM LẤY IP THÔNG MINH (LOC VMWARE)
     static string GetLocalIP()
     {
         string bestIp = "127.0.0.1";
-
         foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
         {
-            // 1. Bỏ qua card mạng đã bị tắt hoặc là Loopback
-            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback)
-                continue;
+            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
 
-            // 2. Bỏ qua các card ảo của VMware, VirtualBox
+            // Lọc kỹ hơn các loại card ảo
             string name = ni.Description.ToLower();
-            if (name.Contains("vmware") || name.Contains("virtual") || name.Contains("pseudo"))
-                continue;
+            if (name.Contains("vmware") || name.Contains("virtual") || name.Contains("pseudo") || name.Contains("vbox")) continue;
 
-            // 3. Tìm IP trong card này
             foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
             {
-                if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    // Ưu tiên lấy luôn nếu tìm thấy
-                    return ip.Address.ToString();
-                }
+                if (ip.Address.AddressFamily == AddressFamily.InterNetwork) return ip.Address.ToString();
             }
         }
         return bestIp;

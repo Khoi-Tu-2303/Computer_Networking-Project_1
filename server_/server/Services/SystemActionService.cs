@@ -7,17 +7,15 @@ namespace server_os.Services
 {
     public class SystemActionService
     {
-        // --- 1. SHUTDOWN ---
-        public void Shutdown()
-        {
-            Process.Start("shutdown", "/s /t 0"); // Lệnh tắt máy ngay lập tức
-        }
-        public void Restart()
-        {
-            // /r = restart, /t 0 = thời gian chờ 0 giây
-            Process.Start("shutdown", "/r /t 0");
-        }
-        // --- 2. CHỤP MÀN HÌNH ---
+        // Cache để tính toán CPU Usage (So sánh thời gian cũ và mới)
+        private static Dictionary<int, TimeSpan> _prevCpuTimes = new Dictionary<int, TimeSpan>();
+        private static DateTime _prevCheckTime = DateTime.Now;
+
+        // --- 1. SHUTDOWN & RESTART (Giữ nguyên) ---
+        public void Shutdown() => Process.Start("shutdown", "/s /t 0");
+        public void Restart() => Process.Start("shutdown", "/r /t 0");
+
+        // --- 2. CAPTURE SCREEN (Giữ nguyên) ---
         public string CaptureScreenToBase64()
         {
             try
@@ -39,24 +37,83 @@ namespace server_os.Services
             catch (Exception ex) { return "Error: " + ex.Message; }
         }
 
-        // --- 3. PROCESS / APPLICATION ---
+        // --- 3. REAL PROCESS MANAGER (NÂNG CẤP) ---
         public List<string> GetProcessList()
         {
             List<string> list = new List<string>();
             Process[] processes = Process.GetProcesses();
+
+            // Tính toán thời gian trôi qua từ lần check trước
+            var now = DateTime.Now;
+            double timeDiff = (now - _prevCheckTime).TotalMilliseconds;
+            _prevCheckTime = now;
+
             foreach (Process p in processes)
             {
-                // Logic thầy: Chỉ lấy cái có WindowTitle là "Application", còn lại là Process thường
-                // Ở đây mình lấy hết nhưng format đẹp để Client dễ nhìn
-                if (!string.IsNullOrEmpty(p.MainWindowTitle))
+                try
                 {
-                    list.Add($"[APP] ID:{p.Id} | Name: {p.ProcessName} | Title: {p.MainWindowTitle}");
+                    // 1. Lấy thông tin cơ bản (ID, Name)
+                    int pid = p.Id;
+                    string name = p.ProcessName;
+                    string title = "";
+                    string type = "PROC";
+
+                    // Fix lỗi PID 0 (System Idle) và PID 4 (System)
+                    if (pid == 0) name = "System Idle Process";
+                    if (pid == 4) name = "System";
+
+                    // 2. Lấy Title và xác định Type (APP hay PROC)
+                    // Cần try-catch riêng vì p.MainWindowTitle có thể lỗi với process hệ thống
+                    try
+                    {
+                        title = p.MainWindowTitle;
+                        if (!string.IsNullOrEmpty(title)) type = "APP";
+                    }
+                    catch { }
+
+                    // 3. Lấy RAM (Real Memory - Working Set)
+                    // Chuyển từ Bytes -> MB
+                    long memBytes = p.WorkingSet64;
+                    double memMb = memBytes / 1024.0 / 1024.0;
+
+                    // 4. Tính toán CPU % (Logic Delta)
+                    double cpuUsage = 0;
+                    try
+                    {
+                        TimeSpan currentTotalProcessorTime = p.TotalProcessorTime;
+
+                        if (_prevCpuTimes.ContainsKey(pid) && timeDiff > 0)
+                        {
+                            TimeSpan prevTotalProcessorTime = _prevCpuTimes[pid];
+                            double cpuUsedMs = (currentTotalProcessorTime - prevTotalProcessorTime).TotalMilliseconds;
+                            // Chia cho số luồng CPU để ra % tổng thể
+                            cpuUsage = (cpuUsedMs / (timeDiff * Environment.ProcessorCount)) * 100;
+                        }
+
+                        // Cập nhật lại cache cho lần sau
+                        _prevCpuTimes[pid] = currentTotalProcessorTime;
+                    }
+                    catch
+                    {
+                        // Process hệ thống không cho đọc CPU time thì để 0
+                        cpuUsage = 0;
+                    }
+
+                    // Format dữ liệu gửi về Client
+                    // [TYPE] ID:x | Name:x | Title:x | CPU:x | RAM:x
+                    list.Add($"[{type}] ID:{pid} | Name:{name} | Title:{title} | CPU:{cpuUsage:0.0} | RAM:{memMb:0}");
                 }
-                else
+                catch
                 {
-                    list.Add($"[PROC] ID:{p.Id} | Name: {p.ProcessName}");
+                    // Bỏ qua các process bị Access Denied hoàn toàn (như Antivirus xịn)
+                    continue;
                 }
             }
+
+            // Dọn dẹp cache các PID đã chết
+            var deadPids = _prevCpuTimes.Keys.Except(processes.Select(p => p.Id)).ToList();
+            foreach (var pid in deadPids) _prevCpuTimes.Remove(pid);
+
             return list;
         }
 
@@ -71,9 +128,7 @@ namespace server_os.Services
             catch (Exception ex) { return "Lỗi: " + ex.Message; }
         }
 
-        // --- 4. REGISTRY (Logic thầy chuyển sang) ---
-
-        // Hàm hỗ trợ lấy Key gốc (HKEY_LOCAL_MACHINE...)
+        // --- 4. START APP & REGISTRY (Giữ nguyên) ---
         private RegistryKey? GetBaseRegistryKey(string link)
         {
             if (link.Contains('\\'))
@@ -92,17 +147,9 @@ namespace server_os.Services
         }
         public string StartProcess(string appName)
         {
-            try
-            {
-                Process.Start(appName);
-                return $"Đã mở ứng dụng: {appName}";
-            }
-            catch (Exception ex)
-            {
-                return "Lỗi mở app: " + ex.Message;
-            }
+            try { Process.Start(appName); return $"Started: {appName}"; }
+            catch (Exception ex) { return "Error: " + ex.Message; }
         }
-        // Xử lý chung cho các lệnh Registry
         public string RegistryAction(string action, string link, string valueName, string value, string typeValue)
         {
             try
@@ -153,6 +200,7 @@ namespace server_os.Services
             {
                 return "Lỗi Registry: " + ex.Message;
             }
+            return "Registry logic placeholder";
         }
     }
 }

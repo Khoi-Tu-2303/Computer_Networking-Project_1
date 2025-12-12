@@ -11,7 +11,7 @@ builder.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddHostedService<SystemMonitorService>();
 // A. Đăng ký SignalR (WebSocket)
 builder.Services.AddSignalR();
 

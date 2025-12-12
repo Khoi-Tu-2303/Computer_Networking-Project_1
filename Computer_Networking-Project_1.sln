@@ -1,0 +1,41 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "client_", "client_", "{5E7D771A-0720-EEFD-A95F-06D48EC38791}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "server_", "server_", "{00D93953-564E-EC8A-DBDB-B9FFB3517CA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IpAgent", "client_\IpAgent\IpAgent.csproj", "{A8B7C1E0-D8F8-F203-CD55-DF16A31474A2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "server", "server", "{6CDB540B-4B17-B9C0-38CE-6FFA6187F8D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server_os", "server_\server\server_os.csproj", "{CF131B3C-7CDF-1E00-BB61-40F536BED155}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A8B7C1E0-D8F8-F203-CD55-DF16A31474A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8B7C1E0-D8F8-F203-CD55-DF16A31474A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8B7C1E0-D8F8-F203-CD55-DF16A31474A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8B7C1E0-D8F8-F203-CD55-DF16A31474A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF131B3C-7CDF-1E00-BB61-40F536BED155}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF131B3C-7CDF-1E00-BB61-40F536BED155}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF131B3C-7CDF-1E00-BB61-40F536BED155}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF131B3C-7CDF-1E00-BB61-40F536BED155}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A8B7C1E0-D8F8-F203-CD55-DF16A31474A2} = {5E7D771A-0720-EEFD-A95F-06D48EC38791}
+		{6CDB540B-4B17-B9C0-38CE-6FFA6187F8D6} = {00D93953-564E-EC8A-DBDB-B9FFB3517CA7}
+		{CF131B3C-7CDF-1E00-BB61-40F536BED155} = {6CDB540B-4B17-B9C0-38CE-6FFA6187F8D6}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3D3E4894-63B9-4EEC-8169-63381D74C3FB}
+	EndGlobalSection
+EndGlobal

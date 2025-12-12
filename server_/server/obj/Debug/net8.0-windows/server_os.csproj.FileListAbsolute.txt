@@ -68,3 +68,12 @@ D:\Project\server_\server\obj\Debug\net8.0-windows\refint\server_os.dll
 D:\Project\server_\server\obj\Debug\net8.0-windows\server_os.pdb
 D:\Project\server_\server\obj\Debug\net8.0-windows\server_os.genruntimeconfig.cache
 D:\Project\server_\server\obj\Debug\net8.0-windows\ref\server_os.dll
+D:\Project\server_\server\bin\Debug\net8.0-windows\System.Configuration.ConfigurationManager.dll
+D:\Project\server_\server\bin\Debug\net8.0-windows\System.Diagnostics.EventLog.dll
+D:\Project\server_\server\bin\Debug\net8.0-windows\System.Diagnostics.PerformanceCounter.dll
+D:\Project\server_\server\bin\Debug\net8.0-windows\System.Security.Cryptography.ProtectedData.dll
+D:\Project\server_\server\bin\Debug\net8.0-windows\System.Threading.AccessControl.dll
+D:\Project\server_\server\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Diagnostics.EventLog.Messages.dll
+D:\Project\server_\server\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Diagnostics.EventLog.dll
+D:\Project\server_\server\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Diagnostics.PerformanceCounter.dll
+D:\Project\server_\server\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Threading.AccessControl.dll

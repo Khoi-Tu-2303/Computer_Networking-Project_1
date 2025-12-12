@@ -1,10 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "drq8FpnoZRM=",
+  "dgSpecHash": "qhlgDUMKsyc=",
   "success": true,
-  "projectFilePath": "D:\\Project\\client_\\IpAgent\\IpAgent.csproj",
+  "projectFilePath": "D:\\MyProject\\CPP\\CNW\\Computer_Networking-Project_1\\client_\\IpAgent\\IpAgent.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\ADMIN\\.nuget\\packages\\fleck\\1.2.0\\fleck.1.2.0.nupkg.sha512"
+    "C:\\Users\\Minh Duc\\.nuget\\packages\\fleck\\1.2.0\\fleck.1.2.0.nupkg.sha512",
+    "C:\\Users\\Minh Duc\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.22\\microsoft.netcore.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\Minh Duc\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.22\\microsoft.windowsdesktop.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\Minh Duc\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.22\\microsoft.aspnetcore.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\Minh Duc\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.22\\microsoft.netcore.app.host.win-x64.8.0.22.nupkg.sha512"
   ],
   "logs": []
 }
