@@ -12,10 +12,10 @@ echo [1/2] Dang bat Tool lay IP LAN (IpAgent)...
 :: Mở cửa sổ mới để chạy C#
 start "IP Agent Helper" cmd /k "cd IpAgent && dotnet run"
 
-:: --- SỬA Ở ĐÂY: Tăng thời gian chờ lên 10 giây ---
+:: --- Tăng thời gian chờ lên 5 giây ---
 echo.
-echo Dang doi Agent khoi dong (10 giay)...
-timeout /t 10 >nul
+echo Dang doi Agent khoi dong (5 giay)...
+timeout /t 5 >nul
 
 :: 2. Sau khi chờ xong mới chạy Web Client
 echo.
