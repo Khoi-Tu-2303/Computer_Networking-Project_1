@@ -15,7 +15,7 @@ Hệ thống giám sát và điều khiển máy tính từ xa theo kiến trúc
 * 📷 **Webcam Streaming:** Xem trực tiếp hình ảnh từ Camera của máy trạm (Low latency & High FPS).
 * ⌨️ **Keylogger:** Ghi lại thao tác bàn phím thời gian thực (Real-time Keystroke capturing).
 * 📊 **System Monitor:** Theo dõi biểu đồ % CPU và lượng RAM tiêu thụ.
-* ⚙️ **Process Manager:** Xem danh sách tiến trình và buộc dừng (Kill) từ xa.
+* ⚙️ **Process/Application Manager:** Xem danh sách tiến trình và buộc dừng (Kill) từ xa.
 * 🔌 **Power Control:** Tắt máy (Shutdown) hoặc Khởi động lại (Restart) từ xa.
 * 🔍 **Auto Discovery:** Tự động quét và tìm kiếm Server trong mạng LAN (không cần nhập IP).
 
