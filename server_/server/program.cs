@@ -1,6 +1,6 @@
 ﻿using server_os.Hubs;
 using server_os.Services;
-using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.ResponseCompression; // Nếu cần nén, nhưng Base64 thì ko tác dụng mấy
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,24 +12,34 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// A. Đăng ký SignalR (WebSocket)
-builder.Services.AddSignalR();
+// --- QUAN TRỌNG: Cấu hình SignalR tăng giới hạn gói tin ---
+builder.Services.AddSignalR(hubOptions =>
+{
+    // Tăng giới hạn nhận tin lên 10MB (đủ cho ảnh 4K Base64)
+    hubOptions.MaximumReceiveMessageSize = 10 * 1024 * 1024;
+    hubOptions.EnableDetailedErrors = true; // Bật để dễ debug lỗi
+});
 
-// B. Đăng ký các Service xử lý logic
-// QUAN TRỌNG: Các service này nên là Singleton để giữ trạng thái
+// --- REGISTER SERVICES ---
+// 1. Service chạy ngầm (System Monitor - CPU/RAM)
+builder.Services.AddHostedService<SystemMonitorService>();
+
+// 2. Các Service Logic (Singleton - Sống suốt đời ứng dụng)
 builder.Services.AddSingleton<KeyloggerService>();
-builder.Services.AddSingleton<SystemActionService>(); // Đổi sang Singleton cho nhẹ, tạo 1 lần dùng mãi
-builder.Services.AddSingleton<WebcamService>();       // <--- QUAN TRỌNG: Phải có cái này Webcam mới chạy
+builder.Services.AddSingleton<SystemActionService>();
+builder.Services.AddSingleton<WebcamService>();         // Webcam
+builder.Services.AddSingleton<ScreenStreamService>();   // UltraView: Chụp màn hình
+builder.Services.AddSingleton<InputControlService>();   // UltraView: Điều khiển chuột/phím
 
 // C. Cấu hình CORS (Cho phép Client React kết nối)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
     {
-        policy.SetIsOriginAllowed(origin => true) // Cho phép MỌI nguồn (localhost, IP LAN,...)
+        policy.SetIsOriginAllowed(origin => true) // Chấp nhận mọi IP (LAN, Wifi...)
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); // Bắt buộc cho SignalR
+              .AllowCredentials();
     });
 });
 
@@ -42,22 +52,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowReact"); // Kích hoạt CORS
+app.UseCors("AllowReact");
 
-// D. Cấu hình hiển thị giao diện Server (Dashboard đen)
-app.UseDefaultFiles(); // Tự động tìm index.html
-app.UseStaticFiles();  // Cho phép tải css/js
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.MapControllers();
 
 // E. Map SignalR Hub
 app.MapHub<SystemHub>("/systemHub");
 
-// F. API Discovery (Để Client quét mạng LAN tìm ra Server)
+// F. API Discovery
 app.MapGet("/api/discovery", () =>
 {
     return Results.Ok(new { message = "REMOTE_SERVER_HERE", machine = Environment.MachineName });
 });
 
-// Chạy ứng dụng
 app.Run();

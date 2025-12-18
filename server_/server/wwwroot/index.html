@@ -53,9 +53,36 @@
                 transform: translateX(0);
             }
         }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f0f0f;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #059669;
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #10b981;
+            }
+
+        /* --- HIỆU ỨNG NỀN TERMINAL (MỚI) --- */
+        /* Màu xám đen nhẹ + sọc ngang CRT */
+        .terminal-bg {
+            background-color: #0c0c0c;
+            background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 3px, 3px 100%;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8); /* Bóng đổ vào trong tạo độ sâu */
+        }
     </style>
 </head>
-<body class="bg-black text-gray-100 min-h-screen terminal-font">
+<body class="bg-black text-gray-100 min-h-screen terminal-font selection:bg-green-500/30">
     <div class="container mx-auto px-4 py-6 max-w-7xl">
 
         <header class="mb-6 border-b-2 border-green-500 pb-4">
@@ -64,7 +91,7 @@
                     <h1 class="text-3xl font-bold text-green-500 glow-green tracking-wider">▸ REMOTE SYSTEM MONITOR</h1>
                     <p class="text-gray-500 text-sm mt-1">REAL-TIME DASHBOARD | SIGNALR CORE</p>
                 </div>
-                <div class="flex items-center gap-6 bg-gray-900 px-4 py-3 rounded border border-gray-800">
+                <div class="flex items-center gap-6 bg-gray-900 border border-gray-800 px-4 py-3 rounded shadow-lg">
                     <div class="flex items-center gap-2">
                         <span class="text-gray-400 text-sm">SERVER IP:</span>
                         <span class="text-green-400 font-bold" id="server-ip">Detecting...</span>
@@ -77,22 +104,22 @@
             </div>
         </header>
 
-        <section class="mb-6 bg-gray-900 border border-gray-800 rounded-lg p-6">
+        <section class="mb-6 bg-gray-900 border border-gray-800 rounded-lg p-6 shadow-md">
             <h2 class="text-xl text-green-400 mb-4 flex items-center gap-2">
                 <i data-lucide="settings" class="w-5 h-5"></i> CONTROL PANEL
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="flex items-center justify-between bg-black border border-gray-800 rounded p-4">
+                <div class="flex items-center justify-between bg-black/50 border border-gray-700 rounded p-4">
                     <div class="flex items-center gap-3">
-                        <i data-lucide="wifi" class="w-5 h-5 text-green-400"></i>
-                        <span class="text-gray-300">ACCEPT INCOMING CONNECTIONS</span>
+                        <i data-lucide="shield" class="w-5 h-5 text-green-400"></i>
+                        <span class="text-gray-300">SYSTEM LOCK (BLOCK ACTIONS)</span>
                     </div>
-                    <button id="connection-toggle" class="relative inline-flex h-8 w-16 items-center rounded-full bg-green-600 transition-colors">
-                        <span id="toggle-slider" class="inline-block h-6 w-6 transform rounded-full bg-white transition-transform translate-x-9"></span>
+                    <button id="connection-toggle" class="relative inline-flex h-8 w-16 items-center rounded-full bg-gray-600 transition-colors cursor-pointer">
+                        <span id="toggle-slider" class="inline-block h-6 w-6 transform rounded-full bg-white transition-transform translate-x-1 shadow-sm"></span>
                     </button>
                 </div>
-                <div class="flex items-center bg-black border border-gray-800 rounded p-4">
-                    <button id="disconnect-all-btn" class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors border border-red-500">
+                <div class="flex items-center bg-black/50 border border-gray-700 rounded p-4">
+                    <button id="disconnect-all-btn" class="w-full flex items-center justify-center gap-2 bg-red-900/80 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-all border border-red-500/50 shadow-md hover:shadow-red-500/50">
                         <i data-lucide="power" class="w-5 h-5"></i> EMERGENCY SHUTDOWN
                     </button>
                 </div>
@@ -100,39 +127,46 @@
         </section>
 
         <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-gray-900 border border-gray-800 rounded-lg p-5">
-                <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">TOTAL CONNECTIONS</span><i data-lucide="users" class="w-4 h-4 text-blue-400"></i></div>
+            <div class="bg-gray-900 border border-gray-800 rounded-lg p-5 shadow-md">
+                <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">TOTAL CLIENTS</span><i data-lucide="users" class="w-4 h-4 text-blue-400"></i></div>
                 <div class="text-3xl font-bold text-blue-400" id="active-connections">0</div>
             </div>
-            <div class="bg-gray-900 border border-gray-800 rounded-lg p-5">
+
+            <div class="bg-gray-900 border border-gray-800 rounded-lg p-5 shadow-md">
                 <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">CPU LOAD</span><i data-lucide="cpu" class="w-4 h-4 text-green-400"></i></div>
                 <div class="text-3xl font-bold text-green-400" id="cpu-percentage">0%</div>
-                <div class="w-full bg-gray-800 rounded-full h-2 mt-2"><div id="cpu-bar" class="bg-green-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+                <div class="w-full bg-gray-800 rounded-full h-2 mt-2 overflow-hidden"><div id="cpu-bar" class="bg-green-500 h-2 rounded-full transition-all duration-500 shadow-[0_0_10px_#22c55e]" style="width: 0%"></div></div>
             </div>
-            <div class="bg-gray-900 border border-gray-800 rounded-lg p-5">
+
+            <div class="bg-gray-900 border border-gray-800 rounded-lg p-5 shadow-md">
                 <div class="flex justify-between mb-2"><span class="text-gray-400 text-sm">RAM USAGE</span><i data-lucide="memory-stick" class="w-4 h-4 text-cyan-400"></i></div>
-                <div class="text-3xl font-bold text-cyan-400" id="ram-percentage">0%</div>
-                <div class="w-full bg-gray-800 rounded-full h-2 mt-2"><div id="ram-bar" class="bg-cyan-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+                <div class="flex items-baseline gap-2">
+                    <div class="text-3xl font-bold text-cyan-400" id="ram-percentage">0%</div>
+                    <div class="text-xs text-gray-500" id="ram-details">0 / 0 GB</div>
+                </div>
+                <div class="w-full bg-gray-800 rounded-full h-2 mt-2 overflow-hidden"><div id="ram-bar" class="bg-cyan-500 h-2 rounded-full transition-all duration-500 shadow-[0_0_10px_#06b6d4]" style="width: 0%"></div></div>
             </div>
         </section>
 
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden neon-border">
-                <div class="bg-black border-b border-gray-800 px-4 py-3 flex justify-between">
+
+            <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden neon-border flex flex-col h-[500px] shadow-lg">
+                <div class="bg-gray-800/90 border-b border-gray-700 px-4 py-3 flex justify-between shrink-0">
                     <h3 class="text-green-400 font-bold flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4"></i> SYSTEM EVENTS LOG</h3>
-                    <button id="clear-logs-btn" class="text-gray-500 hover:text-gray-300 text-xs">[CLEAR]</button>
+                    <button id="clear-logs-btn" class="text-gray-400 hover:text-white text-xs border border-gray-600 px-2 rounded hover:bg-gray-700 transition">[CLEAR]</button>
                 </div>
-                <div id="log-container" class="bg-black p-4 h-96 overflow-y-auto text-sm"></div>
+
+                <div id="log-container" class="terminal-bg p-4 overflow-y-auto text-sm flex-1 font-mono space-y-1"></div>
             </div>
 
-            <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden neon-border">
-                <div class="bg-black border-b border-gray-800 px-4 py-3 flex justify-between">
+            <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden neon-border flex flex-col h-[500px] shadow-lg">
+                <div class="bg-gray-800/90 border-b border-gray-700 px-4 py-3 flex justify-between shrink-0">
                     <h3 class="text-green-400 font-bold flex items-center gap-2"><i data-lucide="monitor" class="w-4 h-4"></i> CONNECTED DEVICES</h3>
-                    <span class="text-gray-500 text-xs">MONITORING</span>
+                    <span class="text-gray-500 text-xs animate-pulse flex items-center gap-1">● LIVE MONITORING</span>
                 </div>
-                <div class="overflow-x-auto h-96">
+                <div class="overflow-x-auto flex-1 bg-black/40">
                     <table class="w-full text-sm" id="clients-table">
-                        <thead class="bg-black text-green-400 sticky top-0">
+                        <thead class="bg-black/60 text-green-400 sticky top-0 z-10 border-b border-gray-800 backdrop-blur-sm">
                             <tr>
                                 <th class="px-4 py-3 text-left">DEVICE NAME</th>
                                 <th class="px-4 py-3 text-left">IP ADDRESS</th>
@@ -153,48 +187,98 @@
         document.getElementById('server-ip').innerText = window.location.hostname;
 
         let isSystemLocked = false;
-        let myConnectionId = ""; // Lưu ID của chính Dashboard để phân biệt
+        let myConnectionId = "";
+        let isOnline = false; // [THÊM] Biến theo dõi trạng thái mạng
 
-        // --- KẾT NỐI SIGNALR ---
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/systemHub")
             .withAutomaticReconnect()
             .build();
 
-        // 1. Nhận Log
+        // --- CÁC HÀM XỬ LÝ SỰ KIỆN SIGNALR ---
+
         connection.on("ReceiveLog", (msg) => {
+            if (msg.includes("EMERGENCY SHUTDOWN INITIATED")) {
+                return;
+            }
             let level = "INFO";
-            if (msg.includes("STOPPED") || msg.includes("BLOCKED") || msg.includes("Disconnected")) level = "WARN";
-            if (msg.includes("New connection")) level = "NET";
-            if (msg.includes("LOCKED")) level = "SEC";
-            addLog(level, msg);
+            let colorClass = "text-green-400";
+            if (msg.includes("STOPPED") || msg.includes("BLOCKED") || msg.includes("Disconnected") || msg.includes("WARN")) {
+                level = "WARN"; colorClass = "text-yellow-400";
+            }
+            if (msg.includes("Error") || msg.includes("SHUTDOWN") || msg.includes("Emergency")) {
+                level = "ERR "; colorClass = "text-red-500 font-bold";
+            }
+            if (msg.includes("Started") || msg.includes("Connected") || msg.includes("New connection")) {
+                level = "NET "; colorClass = "text-blue-400";
+            }
+            if (msg.includes("LOCKED") || msg.includes("UNLOCKED")) {
+                level = "SEC "; colorClass = "text-purple-400";
+            }
+            if (msg.includes("Screenshot") || msg.includes("Process") || msg.includes("Recording")) {
+                level = "DATA"; colorClass = "text-cyan-400";
+            }
+            addLog(level, msg, colorClass);
         });
 
-        // 2. CẬP NHẬT DANH SÁCH ID THẬT (Thay cho UpdateClientCount cũ)
         connection.on("UpdateClientList", (listIDs) => {
-            // listIDs là một mảng các chuỗi: ["abc...", "xyz..."]
-
-            // Cập nhật số lượng
             document.getElementById("active-connections").innerText = listIDs.length;
-
-            // Vẽ lại bảng
             updateClientTableReal(listIDs);
         });
 
-        // 3. Cập nhật trạng thái khóa
         connection.on("UpdateSystemStatus", (isLocked) => {
             isSystemLocked = isLocked;
             updateToggleUI(isLocked);
         });
 
-        connection.on("ReceiveScreenshot", () => addLog("DATA", "📸 Received Screenshot data"));
-        connection.on("ReceiveProcessList", () => addLog("DATA", "📋 Process List generated"));
+        connection.on("ServerStopping", () => {
+            addLog("CRIT", "SERVER IS SHUTTING DOWN...", "text-red-600 bg-red-950/30");
+            setOfflineUI(); // [GỌI HÀM] Chuyển UI sang Offline
+        });
 
-        // --- XỬ LÝ NÚT GẠT ---
+        connection.onclose(() => {
+            setOfflineUI(); // [GỌI HÀM] Chuyển UI sang Offline khi mất kết nối
+        });
+
+        connection.onreconnecting(() => {
+            document.getElementById("server-status").innerText = "RECONNECTING...";
+            document.getElementById("status-indicator").className = "w-3 h-3 bg-yellow-500 rounded-full animate-bounce";
+        });
+
+        connection.onreconnected(() => {
+            setOnlineUI(); // [GỌI HÀM] Khôi phục UI khi có mạng lại
+        });
+
+        connection.on("ReceiveSystemStats", (stats) => {
+            if (!stats) return;
+            const cpuVal = stats.cpu.toFixed(1) + "%";
+            document.getElementById('cpu-percentage').innerText = cpuVal;
+            document.getElementById('cpu-bar').style.width = cpuVal;
+
+            const ramPercent = Math.round((stats.ramUsed / stats.ramTotal) * 100);
+            document.getElementById('ram-percentage').innerText = ramPercent + "%";
+            document.getElementById('ram-bar').style.width = ramPercent + "%";
+
+            const usedGB = (stats.ramUsed / 1024).toFixed(1);
+            const totalGB = (stats.ramTotal / 1024).toFixed(0);
+            document.getElementById('ram-details').innerText = `${usedGB} / ${totalGB} GB`;
+        });
+
+        // --- CÁC HÀM XỬ LÝ UI ---
+
         const toggleBtn = document.getElementById('connection-toggle');
         const toggleSlider = document.getElementById('toggle-slider');
+        const shutdownBtn = document.getElementById('disconnect-all-btn');
 
         function updateToggleUI(locked) {
+            // [THÊM] Nếu offline thì mờ nút đi
+            if (!isOnline) {
+                toggleBtn.classList.add("opacity-50", "cursor-not-allowed");
+                return;
+            } else {
+                toggleBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            }
+
             if (!locked) {
                 toggleBtn.classList.replace('bg-gray-600', 'bg-green-600');
                 toggleSlider.classList.replace('translate-x-1', 'translate-x-9');
@@ -204,113 +288,156 @@
             }
         }
 
+        // [SỬA] Thêm check !isOnline
         toggleBtn.addEventListener('click', async () => {
+            if (!isOnline) return; // Chặn bấm nếu mất mạng
             const newState = !isSystemLocked;
-            try {
-                await connection.invoke("ToggleSystemLock", newState);
-            } catch (err) {
-                addLog("ERR", "Lỗi gửi lệnh khóa: " + err.toString());
-            }
+            try { await connection.invoke("ToggleSystemLock", newState); }
+            catch (err) { addLog("ERR ", "Lỗi khóa: " + err.toString(), "text-red-500"); }
         });
 
-        // --- HÀM UI ---
-        function addLog(level, message) {
+        function addLog(level, message, colorClass) {
             const logContainer = document.getElementById('log-container');
             const time = new Date().toLocaleTimeString();
-            const colors = { 'INFO': 'text-green-400', 'WARN': 'text-yellow-400', 'ERR': 'text-red-400', 'CMD': 'text-cyan-400', 'NET': 'text-blue-400', 'SEC': 'text-purple-400' };
             const div = document.createElement('div');
-            div.className = 'log-entry text-gray-400 border-b border-gray-800 py-1';
-            div.innerHTML = `[${time}] <span class="${colors[level] || 'text-white'} font-bold">${level}</span> | ${message}`;
+            div.className = 'log-entry border-b border-gray-800/50 py-1 hover:bg-white/5 px-2 transition-colors';
+            div.innerHTML = `
+                        <span class="text-gray-500 text-xs select-none">[${time}]</span>
+                        <span class="${colorClass} font-bold mx-2 w-12 inline-block text-center border border-gray-700/50 bg-black/30 rounded text-[10px] select-none">${level}</span>
+                        <span class="text-gray-300 break-all font-mono tracking-tight">${message}</span>
+                    `;
             logContainer.appendChild(div);
             logContainer.scrollTop = logContainer.scrollHeight;
+            if (logContainer.childElementCount > 100) logContainer.removeChild(logContainer.firstChild);
         }
 
-        // HÀM VẼ BẢNG ID THẬT
-        function updateClientTableReal(clients) { // Đổi tên tham số từ ids thành clients
+        function updateClientTableReal(clients) {
             const tbody = document.getElementById("clients-tbody");
             if (!tbody) return;
             tbody.innerHTML = "";
-
             if (!clients || clients.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-gray-600 italic">No active connections</td></tr>`;
                 return;
             }
-
             clients.forEach(client => {
                 const tr = document.createElement("tr");
-                tr.className = "hover:bg-gray-800 transition-colors border-b border-gray-800";
-
-                // Kiểm tra xem đây có phải là chính Dashboard không
-                // client.connectionId là trường dữ liệu từ C# gửi xuống (viết hoa chữ cái đầu ConnectionId -> connectionId khi sang JS thường thành chữ thường, nhưng SignalR giữ nguyên case nếu không config)
-                // Tốt nhất là log ra xem cấu trúc object: console.log(client);
-
+                tr.className = "hover:bg-white/5 transition-colors border-b border-gray-800";
                 const isMe = (client.connectionId === myConnectionId);
-
-                // Màu sắc icon
-                const iconColor = isMe ? "text-purple-400" : "text-blue-400";
-                const rowClass = isMe ? "font-bold text-purple-300" : "text-gray-300";
-
-                // IP thật từ Server
+                const isHost = (client.ipAddress === "127.0.0.1" || client.name.includes("HOST"));
+                let icon = "monitor";
+                let nameColor = "text-blue-400";
+                if (isHost) { icon = "server"; nameColor = "text-purple-400"; }
                 const displayIP = client.ipAddress || "Unknown";
-
                 tr.innerHTML = `
-                    <td class="px-4 py-3 ${rowClass} flex items-center gap-2">
-                        <i data-lucide="monitor" class="w-4 h-4 ${iconColor}"></i> 
-                        ${client.name} ${isMe ? "(YOU)" : ""}
-                    </td>
-                    <td class="px-4 py-3 text-gray-500 font-mono">${displayIP}</td>
-                    <td class="px-4 py-3">
-                        <span class="text-green-400 text-xs flex items-center gap-1">
-                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> 
-                            Online
-                        </span>
-                    </td>
-                `;
+                                <td class="px-4 py-3 ${isMe ? 'font-bold text-white' : 'text-gray-300'} flex items-center gap-2">
+                                    <i data-lucide="${icon}" class="w-4 h-4 ${nameColor}"></i>
+                                    ${client.name} ${isMe ? "<span class='text-xs text-gray-500'>(YOU)</span>" : ""}
+                                </td>
+                                <td class="px-4 py-3 text-gray-500 font-mono">${displayIP}</td>
+                                <td class="px-4 py-3">
+                                    <span class="text-green-400 text-xs flex items-center gap-1 border border-green-900/50 bg-green-900/10 px-2 py-1 rounded-full w-fit">
+                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_5px_#22c55e]"></span>
+                                        Online
+                                    </span>
+                                </td>
+                            `;
                 tbody.appendChild(tr);
             });
-
             if (window.lucide) lucide.createIcons();
         }
-        // --- KHỞI ĐỘNG ---
+
+        // [MỚI] Hàm cập nhật UI khi Online
+        function setOnlineUI() {
+            isOnline = true;
+            const indicator = document.getElementById("status-indicator");
+            const statusText = document.getElementById("server-status");
+
+            indicator.className = "w-3 h-3 rounded-full bg-green-500 status-pulse shadow-[0_0_8px_#22c55e]";
+            statusText.innerText = "ONLINE";
+            statusText.className = "text-green-400 font-bold";
+
+            // Bật lại các nút
+            shutdownBtn.classList.remove("opacity-50", "cursor-not-allowed", "grayscale");
+            toggleBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+
+        // [MỚI] Hàm cập nhật UI khi Offline
+        function setOfflineUI() {
+            isOnline = false;
+            const indicator = document.getElementById("status-indicator");
+            const statusText = document.getElementById("server-status");
+
+            indicator.className = "w-3 h-3 rounded-full bg-red-500";
+            statusText.innerText = "OFFLINE";
+            statusText.className = "text-red-500 font-bold";
+
+            // Vô hiệu hóa các nút
+            shutdownBtn.classList.add("opacity-50", "cursor-not-allowed", "grayscale");
+            toggleBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+            // Nếu đang ở trạng thái confirm shutdown thì reset về ban đầu
+            resetShutdownButton();
+        }
+
         async function startApp() {
             try {
                 await connection.start();
-
-                // Lấy ID của chính mình để nhận diện
                 myConnectionId = connection.connectionId;
-
-                const indicator = document.getElementById("status-indicator");
-                const statusText = document.getElementById("server-status");
-                indicator.classList.remove("bg-red-500");
-                indicator.classList.add("bg-green-500", "status-pulse");
-                statusText.innerText = "ONLINE";
-                statusText.classList.replace("text-gray-400", "text-green-400");
-                addLog("INFO", "Monitor Connected. My ID: " + myConnectionId);
+                setOnlineUI(); // UI xanh
+                addLog("SYS ", "Dashboard Initialized. Waiting for agents...", "text-green-500");
             } catch (err) {
                 console.error(err);
-                setTimeout(startApp, 5000);
+                document.getElementById("server-status").innerText = "RECONNECTING...";
+                setTimeout(startApp, 3000);
             }
         }
-
-        // Fake Stats
-        setInterval(() => {
-            const cpu = Math.floor(Math.random() * 30) + 5;
-            const ram = Math.floor(Math.random() * 10) + 40;
-            document.getElementById('cpu-percentage').innerText = cpu + "%";
-            document.getElementById('cpu-bar').style.width = cpu + "%";
-            document.getElementById('ram-percentage').innerText = ram + "%";
-            document.getElementById('ram-bar').style.width = ram + "%";
-        }, 2000);
 
         document.getElementById('clear-logs-btn').addEventListener('click', () => {
             document.getElementById('log-container').innerHTML = '';
         });
 
-        document.getElementById('disconnect-all-btn').addEventListener('click', async () => {
-            if (confirm("Dừng Server ngay lập tức?")) {
-                try { await connection.invoke("EmergencyShutdown"); } catch (e) { console.error(e); }
+        let shutdownTimeout;
+
+        shutdownBtn.addEventListener('click', async () => {
+            if (!isOnline) return; // [SỬA] Chặn bấm nếu mất mạng
+
+            const isConfirming = shutdownBtn.getAttribute('data-confirming') === 'true';
+
+            if (isConfirming) {
+                clearTimeout(shutdownTimeout);
+                try {
+                    await connection.invoke("EmergencyShutdown");
+                    addLog("SYS", "Sending Shutdown Signal...", "text-red-500 font-bold");
+                } catch (e) {
+                    // --- [SỬA ĐOẠN NÀY] ---
+                    const errorMsg = e.toString();
+
+                    // Chỉ in lỗi nếu KHÔNG PHẢI là lỗi 1006 (lỗi ngắt kết nối đột ngột)
+                    // Vì khi Shutdown server thì ngắt kết nối là đương nhiên
+                    if (!errorMsg.includes("1006") && !errorMsg.includes("WebSocket closed")) {
+                        addLog("ERR", "Lỗi: " + errorMsg, "text-red-500");
+                    }
+                }
+                resetShutdownButton();
+            } else {
+                shutdownBtn.setAttribute('data-confirming', 'true');
+                shutdownBtn.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5 animate-pulse"></i> CONFIRM?`;
+                shutdownBtn.classList.remove("bg-red-900/80", "hover:bg-red-600");
+                shutdownBtn.classList.add("bg-red-600", "animate-pulse", "border-red-400");
+                if (window.lucide) lucide.createIcons();
+                shutdownTimeout = setTimeout(() => {
+                    resetShutdownButton();
+                }, 5000);
             }
         });
+
+        function resetShutdownButton() {
+            shutdownBtn.removeAttribute('data-confirming');
+            shutdownBtn.innerHTML = `<i data-lucide="power" class="w-5 h-5"></i> EMERGENCY SHUTDOWN`;
+            shutdownBtn.classList.add("bg-red-900/80", "hover:bg-red-600");
+            shutdownBtn.classList.remove("bg-red-600", "animate-pulse", "border-red-400");
+            if (window.lucide) lucide.createIcons();
+        }
 
         startApp();
     </script>

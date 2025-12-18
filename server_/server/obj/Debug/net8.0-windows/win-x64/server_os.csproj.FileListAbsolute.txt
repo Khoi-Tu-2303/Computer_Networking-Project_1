@@ -1,0 +1,105 @@
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\appsettings.json
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.staticwebassets.runtime.json
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.exe
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.deps.json
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.runtimeconfig.json
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.dll
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.pdb
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\AForge.dll
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\AForge.Video.dll
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\AForge.Video.DirectShow.dll
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\Microsoft.OpenApi.dll
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\Swashbuckle.AspNetCore.Swagger.dll
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Project_MMT\server_\server\bin\Debug\net8.0-windows\win-x64\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.csproj.AssemblyReference.cache
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.GeneratedMSBuildEditorConfig.editorconfig
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.AssemblyInfoInputs.cache
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.AssemblyInfo.cs
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.csproj.CoreCompileInputs.cache
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.MvcApplicationPartsAssemblyInfo.cs
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.MvcApplicationPartsAssemblyInfo.cache
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets.build.json
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets.development.json
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.server_os.Microsoft.AspNetCore.StaticWebAssets.props
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.build.server_os.props
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.buildMultiTargeting.server_os.props
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.buildTransitive.server_os.props
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets.pack.json
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\scopedcss\bundle\server_os.styles.css
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.csproj.Up2Date
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.dll
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\refint\server_os.dll
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.pdb
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.genruntimeconfig.cache
+D:\Project_MMT\server_\server\obj\Debug\net8.0-windows\win-x64\ref\server_os.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\appsettings.json
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.staticwebassets.runtime.json
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.exe
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.deps.json
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.runtimeconfig.json
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.pdb
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\AForge.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\AForge.Video.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\AForge.Video.DirectShow.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\Microsoft.OpenApi.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\Swashbuckle.AspNetCore.Swagger.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.csproj.AssemblyReference.cache
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.GeneratedMSBuildEditorConfig.editorconfig
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.AssemblyInfoInputs.cache
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.AssemblyInfo.cs
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.csproj.CoreCompileInputs.cache
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.MvcApplicationPartsAssemblyInfo.cs
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.MvcApplicationPartsAssemblyInfo.cache
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets.build.json
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets.development.json
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.server_os.Microsoft.AspNetCore.StaticWebAssets.props
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.build.server_os.props
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.buildMultiTargeting.server_os.props
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.buildTransitive.server_os.props
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets.pack.json
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\scopedcss\bundle\server_os.styles.css
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.csproj.Up2Date
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\refint\server_os.dll
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.pdb
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.genruntimeconfig.cache
+D:\Now\Computer Network\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\ref\server_os.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\appsettings.json
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.staticwebassets.runtime.json
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.exe
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.deps.json
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.runtimeconfig.json
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\server_os.pdb
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\AForge.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\AForge.Video.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\AForge.Video.DirectShow.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\Microsoft.OpenApi.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\Swashbuckle.AspNetCore.Swagger.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\bin\Debug\net8.0-windows\win-x64\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.csproj.AssemblyReference.cache
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.GeneratedMSBuildEditorConfig.editorconfig
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.AssemblyInfoInputs.cache
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.AssemblyInfo.cs
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.csproj.CoreCompileInputs.cache
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.MvcApplicationPartsAssemblyInfo.cs
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.MvcApplicationPartsAssemblyInfo.cache
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets.build.json
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets.development.json
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.server_os.Microsoft.AspNetCore.StaticWebAssets.props
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.build.server_os.props
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.buildMultiTargeting.server_os.props
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets\msbuild.buildTransitive.server_os.props
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\staticwebassets.pack.json
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\scopedcss\bundle\server_os.styles.css
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.csproj.Up2Date
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\refint\server_os.dll
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.pdb
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\server_os.genruntimeconfig.cache
+D:\Computer_Networking-Project_1-upgradeversion\Computer_Networking-Project_1-upgradeversion\server_\server\obj\Debug\net8.0-windows\win-x64\ref\server_os.dll

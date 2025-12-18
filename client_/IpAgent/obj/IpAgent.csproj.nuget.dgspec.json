@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Project\\client_\\IpAgent\\IpAgent.csproj": {}
+    "D:\\Computer_Networking-Project_1-upgradeversion\\Computer_Networking-Project_1-upgradeversion\\client_\\IpAgent\\IpAgent.csproj": {}
   },
   "projects": {
-    "D:\\Project\\client_\\IpAgent\\IpAgent.csproj": {
+    "D:\\Computer_Networking-Project_1-upgradeversion\\Computer_Networking-Project_1-upgradeversion\\client_\\IpAgent\\IpAgent.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Project\\client_\\IpAgent\\IpAgent.csproj",
+        "projectUniqueName": "D:\\Computer_Networking-Project_1-upgradeversion\\Computer_Networking-Project_1-upgradeversion\\client_\\IpAgent\\IpAgent.csproj",
         "projectName": "IpAgent",
-        "projectPath": "D:\\Project\\client_\\IpAgent\\IpAgent.csproj",
+        "projectPath": "D:\\Computer_Networking-Project_1-upgradeversion\\Computer_Networking-Project_1-upgradeversion\\client_\\IpAgent\\IpAgent.csproj",
         "packagesPath": "C:\\Users\\ADMIN\\.nuget\\packages\\",
-        "outputPath": "D:\\Project\\client_\\IpAgent\\obj\\",
+        "outputPath": "D:\\Computer_Networking-Project_1-upgradeversion\\Computer_Networking-Project_1-upgradeversion\\client_\\IpAgent\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

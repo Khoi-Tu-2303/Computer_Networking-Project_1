@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\Computer_Networking-Project_1-upgradeversion\\Computer_Networking-Project_1-upgradeversion\\server_\\server\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "D:\\Computer_Networking-Project_1-upgradeversion\\Computer_Networking-Project_1-upgradeversion\\server_\\server\\wwwroot\\style.css",
+      "PackagePath": "staticwebassets\\style.css"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0-windows\\win-x64\\staticwebassets\\msbuild.build.server_os.props",
+      "PackagePath": "build\\server_os.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0-windows\\win-x64\\staticwebassets\\msbuild.buildMultiTargeting.server_os.props",
+      "PackagePath": "buildMultiTargeting\\server_os.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0-windows\\win-x64\\staticwebassets\\msbuild.buildTransitive.server_os.props",
+      "PackagePath": "buildTransitive\\server_os.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0-windows\\win-x64\\staticwebassets\\msbuild.server_os.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

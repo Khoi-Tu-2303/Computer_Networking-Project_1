@@ -4,35 +4,66 @@ import { useSocket } from '../contexts/SocketContext';
 import { sendCommand } from '../services/socketService';
 
 export default function PowerControls() {
-    // --- PHẦN NÃO (LOGIC CŨ) ---
+    // --- PHẦN NÃO (LOGIC CŨ & TÍCH HỢP MODAL) ---
     const [showConfirm, setShowConfirm] = useState<'shutdown' | 'restart' | null>(null);
-    const { isConnected, isSystemLocked } = useSocket();
+
+    // Lấy thêm hàm showModal từ Context để gọi thông báo đẹp
+    const { isConnected, isSystemLocked, showModal } = useSocket();
 
     const handleShutdown = async () => {
         if (!isConnected) return;
+
         try {
             await sendCommand('shutdown');
-            alert('LỆNH ĐÃ GỬI: TẮT MÁY!');
+
+            // Thay alert bằng showModal
+            showModal({
+                type: 'success', // Hoặc 'warning' nếu ông thích màu vàng
+                title: 'COMMAND SENT',
+                message: 'Lệnh TẮT MÁY (SHUTDOWN) đã được gửi thành công!',
+                showCancel: false, // Chỉ cần nút đóng
+            });
+
         } catch (error: any) {
-            alert("Lỗi: " + error.message);
+            // Thay alert lỗi bằng showModal error
+            showModal({
+                type: 'error',
+                title: 'COMMAND FAILED',
+                message: "Lỗi gửi lệnh: " + error.message,
+                showCancel: false,
+            });
         }
         setShowConfirm(null);
     };
 
     const handleRestart = async () => {
         if (!isConnected) return;
+
         try {
             await sendCommand('restart');
-            alert('LỆNH ĐÃ GỬI: KHỞI ĐỘNG LẠI!');
+
+            // Thay alert bằng showModal
+            showModal({
+                type: 'success',
+                title: 'COMMAND SENT',
+                message: 'Lệnh KHỞI ĐỘNG LẠI (RESTART) đã được gửi thành công!',
+                showCancel: false,
+            });
+
         } catch (error: any) {
-            alert("Lỗi: " + error.message);
+            showModal({
+                type: 'error',
+                title: 'COMMAND FAILED',
+                message: "Lỗi gửi lệnh: " + error.message,
+                showCancel: false,
+            });
         }
         setShowConfirm(null);
     };
 
     const isDisabled = !isConnected || isSystemLocked;
 
-    // --- PHẦN ÁO (GIAO DIỆN BOLT.AI) ---
+    // --- PHẦN ÁO (GIAO DIỆN BOLT.AI - GIỮ NGUYÊN) ---
     return (
         <div className="glass-panel p-6 rounded-lg h-full flex flex-col justify-center">
 

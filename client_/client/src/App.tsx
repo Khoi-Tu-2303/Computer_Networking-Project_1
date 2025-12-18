@@ -5,8 +5,11 @@ import ScreenshotCard from './components/ScreenshotCard';
 import KeyloggerCard from './components/KeyloggerCard';
 import { AgentSelector } from './components/AgentSelector';
 import { useSocket } from './contexts/SocketContext';
-// 1. IMPORT WEBCAM CARD Ở ĐÂY
 import WebcamCard from './components/WebcamCard';
+import NetworkScanModal from './components/NetworkScanModal';
+
+// 👇 1. IMPORT CÁI NÀY VÀO (QUAN TRỌNG)
+import GlobalModal from './components/GlobalModal';
 
 function App() {
     const { isSystemLocked, isConnected } = useSocket();
@@ -80,18 +83,14 @@ function App() {
                     </div>
                 </div>
 
-                {/* HÀNG 2: Screenshot & Webcam (THAY ĐỔI LỚN TẠI ĐÂY) */}
-                {/* Chuyển thành Grid 2 cột giống hàng 1 để Webcam nằm cạnh Screenshot */}
+                {/* HÀNG 2: Screenshot & Webcam */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                    {/* Cột trái: Screenshot */}
                     <div className="glass-panel p-1 rounded-xl border border-green-500/20">
                         <div className="bg-black/40 p-4 rounded-lg h-full">
                             <ScreenshotCard />
                         </div>
                     </div>
 
-                    {/* Cột phải: Webcam (MỚI) */}
                     <div className="glass-panel p-1 rounded-xl border border-green-500/20">
                         <div className="bg-black/40 p-4 rounded-lg h-full">
                             <WebcamCard />
@@ -119,6 +118,11 @@ function App() {
                     </div>
                 </div>
             </footer>
+
+            {/* 👇 2. ĐẶT COMPONENT VÀO ĐÂY NÓ MỚI HIỆN NHA */}
+            <NetworkScanModal />
+            <GlobalModal />
+
         </div>
     );
 }
