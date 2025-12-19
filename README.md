@@ -17,7 +17,7 @@ Hệ thống giám sát và điều khiển máy tính từ xa theo kiến trúc
 * 📊 **System Monitor:** Theo dõi biểu đồ % CPU và lượng RAM tiêu thụ.
 * ⚙️ **Process/Application Manager:** Xem danh sách tiến trình và buộc dừng (Kill) từ xa.
 * 🔌 **Power Control:** Tắt máy (Shutdown) hoặc Khởi động lại (Restart) từ xa.
-* 🔍 **Auto Discovery:** Tự động quét và tìm kiếm Server trong mạng LAN (không cần nhập IP).
+* 🔍 **Ultraview:** Điều khiển trực tiếp máy Server trong thời gian thực (có thể sử dụng chuột và bàn phím).
 
 ---
 
