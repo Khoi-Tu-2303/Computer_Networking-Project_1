@@ -12,16 +12,16 @@ Hệ thống giám sát và điều khiển máy tính từ xa theo kiến trúc
 
 ## 🚀 Tính năng chính
 
-* 📷 **Webcam Streaming:** Xem trực tiếp hình ảnh từ Camera của máy trạm (Low latency & High FPS).
-* ⌨️ **Keylogger:** Ghi lại thao tác bàn phím thời gian thực (Real-time Keystroke capturing).
+* 📷 **Webcam Streaming:** Xem trực tiếp hình ảnh từ Camera của máy trạm.
+* ⌨️ **Keylogger:** Ghi lại thao tác bàn phím thời gian thực.
 * 📊 **System Monitor:** Theo dõi biểu đồ % CPU và lượng RAM tiêu thụ.
-* ⚙️ **Process/Application Manager:** Xem danh sách tiến trình và buộc dừng (Kill) từ xa.
+* ⚙️ **Process/Application Manager:** Xem danh sách tiến trình và buộc dừng từ xa.
 * 🔌 **Power Control:** Tắt máy (Shutdown) hoặc Khởi động lại (Restart) từ xa.
 * 🔍 **Ultraview:** Điều khiển trực tiếp máy Server trong thời gian thực (có thể sử dụng chuột và bàn phím).
 
 ---
 
-## 🛠️ Yêu cầu hệ thống (Prerequisites)
+## 🛠️ Yêu cầu hệ thống 
 
 Để chạy được dự án này, máy tính cần cài đặt:
 
@@ -31,7 +31,7 @@ Hệ thống giám sát và điều khiển máy tính từ xa theo kiến trúc
 
 ---
 
-## 📥 Hướng dẫn Cài đặt (Installation)
+## 📥 Hướng dẫn Cài đặt
 
 Trước khi chạy lần đầu, bạn cần tải thư viện (chỉ cần làm 1 lần duy nhất khi mới tải về):
 
@@ -57,7 +57,7 @@ cd ../..
 
 ---
 
-## ▶️ Hướng dẫn Chạy (Quick Start)
+## ▶️ Hướng dẫn Chạy
 
 Dự án đã tích hợp sẵn các file kịch bản (`.bat`) để chạy nhanh. Bạn chỉ cần làm theo 2 bước:
 
@@ -78,7 +78,7 @@ File này sẽ tự động bật cả **IpAgent** (Tool hỗ trợ tìm IP) và
 
 ---
 
-## 🐛 Khắc phục lỗi (Troubleshooting)
+## 🐛 Khắc phục lỗi
 
 | Lỗi | Nguyên nhân & Cách sửa |
 | :--- | :--- |
