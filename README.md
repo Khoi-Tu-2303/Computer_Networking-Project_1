@@ -10,7 +10,7 @@ Hệ thống giám sát và điều khiển máy tính từ xa theo kiến trúc
 
 ---
 
-## 🚀 Tính năng chính
+## Tính năng chính
 
 * **Webcam Streaming:** Xem trực tiếp hình ảnh từ Camera của máy trạm.
 * **Keylogger:** Ghi lại thao tác bàn phím thời gian thực.
