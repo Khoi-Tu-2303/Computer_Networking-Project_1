@@ -1,4 +1,4 @@
-﻿# 🖥️ Remote System Monitor & Control (Đồ án Mạng Máy Tính)
+﻿# Remote System Monitor & Control (Đồ án Mạng Máy Tính)
 
 Hệ thống giám sát và điều khiển máy tính từ xa theo kiến trúc **Client-Server**. Ứng dụng cho phép quản trị viên theo dõi màn hình, webcam, hiệu năng hệ thống (CPU/RAM) và thực thi lệnh trên máy trạm thông qua giao diện Web thời gian thực.
 
@@ -12,16 +12,16 @@ Hệ thống giám sát và điều khiển máy tính từ xa theo kiến trúc
 
 ## 🚀 Tính năng chính
 
-* 📷 **Webcam Streaming:** Xem trực tiếp hình ảnh từ Camera của máy trạm.
-* ⌨️ **Keylogger:** Ghi lại thao tác bàn phím thời gian thực.
-* 📊 **System Monitor:** Theo dõi biểu đồ % CPU và lượng RAM tiêu thụ.
-* ⚙️ **Process/Application Manager:** Xem danh sách tiến trình và buộc dừng từ xa.
-* 🔌 **Power Control:** Tắt máy (Shutdown) hoặc Khởi động lại (Restart) từ xa.
-* 🔍 **Ultraview:** Điều khiển trực tiếp máy Server trong thời gian thực (có thể sử dụng chuột và bàn phím).
+* **Webcam Streaming:** Xem trực tiếp hình ảnh từ Camera của máy trạm.
+* **Keylogger:** Ghi lại thao tác bàn phím thời gian thực.
+* **System Monitor:** Theo dõi biểu đồ % CPU và lượng RAM tiêu thụ.
+* **Process/Application Manager:** Xem danh sách tiến trình và buộc dừng từ xa.
+* **Power Control:** Tắt máy (Shutdown) hoặc Khởi động lại (Restart) từ xa.
+* **Ultraview:** Điều khiển trực tiếp máy Server trong thời gian thực (có thể sử dụng chuột và bàn phím).
 
 ---
 
-## 🛠️ Yêu cầu hệ thống 
+## Yêu cầu hệ thống 
 
 Để chạy được dự án này, máy tính cần cài đặt:
 
@@ -31,7 +31,7 @@ Hệ thống giám sát và điều khiển máy tính từ xa theo kiến trúc
 
 ---
 
-## 📥 Hướng dẫn Cài đặt
+## Hướng dẫn Cài đặt
 
 Trước khi chạy lần đầu, bạn cần tải thư viện (chỉ cần làm 1 lần duy nhất khi mới tải về):
 
@@ -57,18 +57,18 @@ cd ../..
 
 ---
 
-## ▶️ Hướng dẫn Chạy
+## Hướng dẫn Chạy
 
 Dự án đã tích hợp sẵn các file kịch bản (`.bat`) để chạy nhanh. Bạn chỉ cần làm theo 2 bước:
 
-### 1️⃣ Bước 1: Chạy Server
-**⚠️ Lưu ý:** Server cần quyền truy cập hệ thống (Shutdown, Keylog...) nên **BẮT BUỘC** phải chạy dưới quyền Admin.
+### Bước 1: Chạy Server
+**Lưu ý:** Server cần quyền truy cập hệ thống (Shutdown, Keylog...) nên **BẮT BUỘC** phải chạy dưới quyền Admin.
 
 1.  Vào thư mục **`server_`**.
 2.  Chuột phải vào file **`run_server.bat`** chọn **Run as Administrator**.
 3.  Khi thấy cửa sổ hiện dòng chữ `Now listening on: http://localhost:5000` là thành công.
 
-### 2️⃣ Bước 2: Chạy Client
+### Bước 2: Chạy Client
 File này sẽ tự động bật cả **IpAgent** (Tool hỗ trợ tìm IP) và **Web Client**.
 
 1.  Vào thư mục **`client_`**.
@@ -78,7 +78,7 @@ File này sẽ tự động bật cả **IpAgent** (Tool hỗ trợ tìm IP) và
 
 ---
 
-## 🐛 Khắc phục lỗi
+## Khắc phục lỗi
 
 | Lỗi | Nguyên nhân & Cách sửa |
 | :--- | :--- |
@@ -89,7 +89,7 @@ File này sẽ tự động bật cả **IpAgent** (Tool hỗ trợ tìm IP) và
 
 ---
 
-## 📬 Liên hệ
+## Liên hệ
 Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ qua:
 - **Email:** 241220**@student.hcmus.edu.vn
 - **GitHub:** https://github.com/Khoi-Tu-2303 (Đại diện 1 người)
